@@ -7,12 +7,15 @@
 - **在线 Demo**：[https://verithesis.vercel.app/](https://verithesis.vercel.app/)
 - **源代码**：[https://github.com/l0t73ry/verithesis](https://github.com/l0t73ry/verithesis)
 - **演示视频（X）**：[https://x.com/BlackburnR22177/status/2121521362321944923](https://x.com/BlackburnR22177/status/2121521362321944923)
+- **投资论点与实证证伪报告**：[THESIS.md](./THESIS.md)
+- **开源协议**：[MIT](./LICENSE)
 
 ## 结构
 
 | 目录 | 说明 |
 |------|------|
-| `enclave-worker/` | 分析、哈希、OutLayer / 本地 WASI 飞地路径 |
+| `THESIS.md` | NEAR 投资论点报告（链上基本面证据 + 无前视回测证伪分析） |
+| `enclave-worker/` | 分析、NEAR 主网 JSON-RPC 质押/验证者指标（`near-rpc.ts`）、哈希、OutLayer / 本地 WASI 飞地路径 |
 | `web-app/` | Next.js Dashboard |
 | `outlayer/verithesis-wasi/` | WASI 模块（`npm run build:wasm`） |
 | `docs/VERIFY.md` | 哈希验真与复现 |

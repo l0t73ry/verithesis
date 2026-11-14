@@ -7,6 +7,8 @@ Verifiable on-chain investment thesis platform built for the **NEAR Hackathon (I
 - **Live Demo**: [https://verithesis.vercel.app/](https://verithesis.vercel.app/)
 - **Source Code**: [https://github.com/l0t73ry/verithesis](https://github.com/l0t73ry/verithesis)
 - **Demo Video (X)**: [https://x.com/BlackburnR22177/status/2121521362321944923](https://x.com/BlackburnR22177/status/2121521362321944923)
+- **Research Thesis & Falsification Report**: [THESIS.md](./THESIS.md)
+- **License**: [MIT](./LICENSE)
 
 ## Overview
 
@@ -14,7 +16,7 @@ Crypto investment research suffers from a "trust black box": analysts can cherry
 
 **VeriThesis** binds every thesis execution to a deterministic cryptographic attestation (`code_measurement` + `input_hash` + `output_hash` + optional Intel TDX quote via OutLayer WASI enclave):
 
-1. **Look-Ahead-Free Multi-Factor & Backtest Engine**: Pulls live NEAR & REF market series (CoinGecko + DefiLlama + GitHub `near/nearcore` commit activity + synthetic funding/whale feeds), computing Pearson lead/lag correlation, Sharpe ratio, max drawdown, and strategy vs. Buy & Hold returns using strictly prior-day signals.
+1. **Live NEAR L1 JSON-RPC + Multi-Factor Backtest Engine**: Queries NEAR Mainnet JSON-RPC (`block` + `validators` via FastNEAR / `rpc.mainnet.near.org` failover, anchoring finalized block height, active validator count, and 128-bit `BigInt` yoctoNEAR staking ratio) alongside live NEAR & REF market series (CoinGecko + DefiLlama NEAR TVL + GitHub `near/nearcore` commit activity), computing Pearson correlation, Sharpe ratio, max drawdown, and strictly causal (no-look-ahead) strategy vs. Buy & Hold returns. See [THESIS.md](./THESIS.md) for the full evidence & falsification analysis.
 2. **Dual Strategy Modes**: Supports both **Transparent** mode and **Sealed Alpha** mode (keeping proprietary strategy weights sealed inside the enclave while still proving execution integrity).
 3. **Deterministic WASI Enclave & Cross-Verification**: Ships with a Rust `wasm32-wasip1` analyzer module (`verithesis-wasi`) executed as a deterministic SHA-256 hash gate (`node:wasi` / `wasmtime`) and compatible with OutLayer coordinator quotes.
 4. **Independent Verification & Share Cards**: Every run generates an immutable receipt, a `?run=<output_hash>` verification link for one-click re-run comparison, a QR-embedded PNG share card, and a **Thesis Arena** for side-by-side snapshot comparison.
@@ -23,7 +25,8 @@ Crypto investment research suffers from a "trust black box": analysts can cherry
 
 | Directory | Description |
 |-----------|-------------|
-| `enclave-worker/` | Multi-factor analysis, deterministic hashing (`stableStringify` + SHA-256), OutLayer coordinator & local WASI enclave path |
+| `THESIS.md` | Evidence-first NEAR investment thesis, causal backtest audit, and falsification criteria |
+| `enclave-worker/` | Multi-factor analysis, NEAR Mainnet JSON-RPC telemetry (`near-rpc.ts`), deterministic hashing (`stableStringify` + SHA-256), OutLayer coordinator & local WASI enclave path |
 | `web-app/` | Next.js 15 Dashboard (App Router, Ant Design, Recharts, i18n: `en` / `zh` / `ja` / `ru`) |
 | `outlayer/verithesis-wasi/` | Rust `wasm32-wasip1` enclave module (`npm run build:wasm`) |
 | `docs/VERIFY.md` | Hash verification & independent reproduction guide |
