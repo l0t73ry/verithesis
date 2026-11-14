@@ -8,13 +8,14 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { analyzeMergedSeries } from '../enclave-worker/src/analyzer.ts';
 import { deriveSyntheticFactors } from '../enclave-worker/src/factors.ts';
+import { runWasmAnalyzer } from '../enclave-worker/src/local-tee.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
 const wasm = join(root, 'outlayer/verithesis-wasi/target/wasm32-wasip1/release/verithesis-wasi.wasm');
 const fixture = join(root, 'outlayer/fixtures/wasm-golden.json');
 
-function main() {
+async function main() {
   if (!existsSync(wasm)) {
     console.error('WASM missing. Run: npm run build:wasm');
     process.exit(1);
@@ -34,15 +35,24 @@ function main() {
   };
   process.env.VERITHESIS_SEALED_BIAS = String(sealed_bias ?? 0.08);
 
-  const run = spawnSync('wasmtime', ['run', wasm, '--'], {
-    input: JSON.stringify(wasmPayload),
-    encoding: 'utf8',
-  });
-  if (run.status !== 0) {
-    console.error(run.stderr || run.stdout);
-    process.exit(run.status ?? 1);
+  // Prefer wasmtime (independent runtime); fall back to node:wasi when it is not installed.
+  const probe = spawnSync('wasmtime', ['--version'], { encoding: 'utf8' });
+  let wasmOut;
+  if (probe.error) {
+    console.log('wasmtime not found — using node:wasi');
+    process.env.VERITHESIS_WASM_PATH = wasm;
+    wasmOut = await runWasmAnalyzer(wasmPayload);
+  } else {
+    const run = spawnSync('wasmtime', ['run', wasm, '--'], {
+      input: JSON.stringify(wasmPayload),
+      encoding: 'utf8',
+    });
+    if (run.status !== 0) {
+      console.error(run.stderr || run.stdout);
+      process.exit(run.status ?? 1);
+    }
+    wasmOut = JSON.parse(run.stdout.trim());
   }
-  const wasmOut = JSON.parse(run.stdout.trim());
 
   const host = analyzeMergedSeries(
     series,
@@ -67,4 +77,7 @@ function main() {
   console.log('verify-wasm OK', wasmOut.output_hash.slice(0, 16) + '…');
 }
 
-main();
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

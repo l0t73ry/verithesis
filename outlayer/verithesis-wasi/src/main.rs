@@ -57,9 +57,10 @@ fn ecma_number(f: f64) -> serde_json::Value {
     if (f - f.round()).abs() < 1e-9 && f.abs() < 9_007_199_254_740_992.0 {
         serde_json::json!(f.round() as i64)
     } else {
+        // JSON.stringify(NaN | ±Infinity) === "null"; mirror it so hashes cannot diverge.
         serde_json::Number::from_f64(f)
             .map(serde_json::Value::Number)
-            .unwrap_or(serde_json::json!(0))
+            .unwrap_or(serde_json::Value::Null)
     }
 }
 
@@ -153,7 +154,7 @@ fn analyze(
     sealed_bias: f64,
     factors: &ThesisFactors,
 ) -> Result<WasmOutput, Box<dyn std::error::Error>> {
-    let window = input.smoothing_window.unwrap_or(1.0);
+    let window = clamp_smoothing_window(input.smoothing_window) as f64;
     let mode = input.strategy_mode.as_deref().unwrap_or("public");
     let token = &input.target_token;
     let tvl_weight = normalize_tvl_weight(input.tvl_weight);
@@ -227,7 +228,7 @@ fn sha256_hex(payload: &str) -> String {
 fn hash_thesis_input(input: &ThesisInput) -> String {
     let body = json!({
         "realtime_unlocked": input.realtime_unlocked.unwrap_or(false),
-        "smoothing_window": normalize_json_number(input.smoothing_window.unwrap_or(1.0)),
+        "smoothing_window": clamp_smoothing_window(input.smoothing_window),
         "strategy_mode": input.strategy_mode.as_deref().unwrap_or("public"),
         "target_token": input.target_token,
         "timeframe": input.timeframe,
@@ -246,7 +247,15 @@ fn hash_output(series: &[SeriesPoint], conclusion: &ThesisConclusion) -> String 
     sha256_hex(&stable_stringify(&body))
 }
 
-/// Match JSON.stringify for smoothing_window integers (1 not 1.0 when whole).
+/// Integer window in [1, 14]; must match `clampSmoothingWindow` in `enclave-worker/src/input.ts`.
+fn clamp_smoothing_window(w: Option<f64>) -> i64 {
+    match w {
+        Some(x) if x.is_finite() => (x.round() as i64).max(1).min(14),
+        _ => 1,
+    }
+}
+
+/// Match JSON.stringify for integers (1 not 1.0 when whole).
 fn normalize_json_number(n: f64) -> Value {
     if (n - n.round()).abs() < 1e-9 {
         json!(n.round() as i64)
@@ -355,12 +364,13 @@ fn weighted_composite_r(price_sm: &[f64], tvl_sm: &[f64], tvl_weight: f64) -> f6
 }
 
 fn sharpe_ratio(daily_returns: &[f64]) -> f64 {
-    if daily_returns.len() < 2 {
+    let r: Vec<f64> = daily_returns.iter().copied().filter(|x| x.is_finite()).collect();
+    if r.len() < 2 {
         return 0.0;
     }
-    let n = daily_returns.len() as f64;
-    let mean = daily_returns.iter().sum::<f64>() / n;
-    let variance = daily_returns.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / (n - 1.0);
+    let n = r.len() as f64;
+    let mean = r.iter().sum::<f64>() / n;
+    let variance = r.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / (n - 1.0);
     let std = variance.sqrt();
     if std == 0.0 {
         return 0.0;
@@ -395,31 +405,28 @@ fn total_return_pct(daily_returns: &[f64]) -> f64 {
     ((eq - 1.0) * 1000.0).round() / 10.0
 }
 
+/// Position on day k comes from day k-1's *relative* changes and is applied to day k's price
+/// return (no look-ahead; day 1 is flat). Must match `backtestWeightedStrategy` in backtest.ts.
 fn backtest_weighted_strategy(
     series: &[SeriesPoint],
     tvl_weight: f64,
 ) -> (f64, f64, f64) {
     let w_tvl = tvl_weight.max(0.2).min(0.8);
     let w_mom = 1.0 - w_tvl;
-    let mut strat: Vec<f64> = Vec::new();
-    for i in 1..series.len() {
-        let dp = series[i].price_usd - series[i - 1].price_usd;
-        let dt = series[i].defi_tvl_usd - series[i - 1].defi_tvl_usd;
-        let score = w_tvl * dt + w_mom * dp;
-        let pos = if score > 0.0 {
-            1.0
-        } else if score < 0.0 {
-            -1.0
-        } else {
-            0.0
-        };
-        let prev = series[i - 1].price_usd;
-        let price_ret = if prev != 0.0 {
-            (series[i].price_usd - prev) / prev
-        } else {
-            0.0
-        };
-        strat.push(pos * price_ret);
+    let price_ch = pct_change(&series.iter().map(|s| s.price_usd).collect::<Vec<_>>());
+    let tvl_ch = pct_change(&series.iter().map(|s| s.defi_tvl_usd).collect::<Vec<_>>());
+    let mut strat: Vec<f64> = Vec::with_capacity(price_ch.len());
+    for k in 0..price_ch.len() {
+        let mut pos = 0.0;
+        if k > 0 {
+            let score = w_tvl * tvl_ch[k - 1] + w_mom * price_ch[k - 1];
+            if score > 0.0 {
+                pos = 1.0;
+            } else if score < 0.0 {
+                pos = -1.0;
+            }
+        }
+        strat.push(pos * price_ch[k]);
     }
     let mut eq = vec![1.0];
     for r in &strat {

@@ -43,8 +43,10 @@ export function totalReturnPct(dailyReturns: number[]): number {
 }
 
 /**
- * Weighted co-move strategy: position each day from sign(w_tvl·ΔTVL + w_mom·Δprice).
- * Returns include execution from day 1 onward (aligned with price returns length).
+ * Weighted co-move strategy. The position held on day k is decided from day k-1's
+ * *relative* changes: sign(w_tvl·ΔTVL% + w_mom·Δprice%), then applied to day k's price return
+ * (no look-ahead). Day 1 has no prior signal, so it is flat. Returns are aligned with
+ * price returns (length = series.length - 1).
  */
 export function backtestWeightedStrategy(
   series: SeriesPoint[],
@@ -52,18 +54,18 @@ export function backtestWeightedStrategy(
 ): { dailyReturns: number[]; sharpe: number; maxDrawdownPct: number; totalReturnPct: number } {
   const wTvl = Math.max(0.2, Math.min(0.8, tvlWeight));
   const wMom = 1 - wTvl;
+  const priceCh = pctChange(series.map((s) => s.price_usd));
+  const tvlCh = pctChange(series.map((s) => s.defi_tvl_usd));
   const stratRets: number[] = [];
 
-  for (let i = 1; i < series.length; i++) {
-    const dp = series[i]!.price_usd - series[i - 1]!.price_usd;
-    const dt = series[i]!.defi_tvl_usd - series[i - 1]!.defi_tvl_usd;
-    const score = wTvl * dt + wMom * dp;
+  for (let k = 0; k < priceCh.length; k++) {
     let pos = 0;
-    if (score > 0) pos = 1;
-    else if (score < 0) pos = -1;
-    const prev = series[i - 1]!.price_usd;
-    const priceRet = prev ? (series[i]!.price_usd - prev) / prev : 0;
-    stratRets.push(pos * priceRet);
+    if (k > 0) {
+      const score = wTvl * tvlCh[k - 1]! + wMom * priceCh[k - 1]!;
+      if (score > 0) pos = 1;
+      else if (score < 0) pos = -1;
+    }
+    stratRets.push(pos * priceCh[k]!);
   }
 
   const eq = equityCurveFromReturns(stratRets);
