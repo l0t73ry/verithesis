@@ -1,4 +1,5 @@
 import { hashOutput, hashThesisInput } from './hash';
+import { clampSmoothingWindow, normalizeTvlWeight } from './input';
 import { backtestHitRate, pctChange, pearson } from './math';
 import { backtestWeightedStrategy, buyAndHoldReturnPct } from './backtest';
 import type { ThesisFactors } from './factors';
@@ -15,13 +16,8 @@ import type {
 const DEFAULT_CODE_MEASUREMENT =
   process.env.VERITHESIS_CODE_MEASUREMENT ?? 'git:verithesis-enclave-v0.3.0';
 
-function normalizeTvlWeight(w?: number): number {
-  const x = w ?? 0.5;
-  return Math.round(Math.max(0.2, Math.min(0.8, x)) * 1000) / 1000;
-}
-
 function smooth(values: number[], window: number): number[] {
-  const w = Math.max(1, Math.min(14, Math.round(window)));
+  const w = clampSmoothingWindow(window);
   if (w <= 1) return values;
   return values.map((_, i) => {
     const slice = values.slice(Math.max(0, i - w + 1), i + 1);
@@ -60,7 +56,8 @@ function buildConclusion(
   const buyHold = buyAndHoldReturnPct(series);
 
   const priceCh = pctChange(series.map((s) => s.price_usd));
-  const recentMom = priceCh.slice(-3).reduce((a, b) => a + b, 0);
+  // Newest-first summation order — identical to `rev().take(3).sum()` in main.rs (float parity).
+  const recentMom = priceCh.slice(-3).reverse().reduce((a, b) => a + b, 0);
 
   let signal: ThesisConclusion['signal'] = 'neutral';
   if (rAdj > 0.25 && recentMom > 0) signal = 'bullish';
@@ -111,6 +108,7 @@ function buildAttestation(
   partial: { series: SeriesPoint[]; conclusion: ThesisConclusion },
   codeMeasurement: string,
   tee: boolean,
+  provider: AttestationBundle['provider'],
 ): AttestationBundle {
   const input_hash = hashThesisInput(input);
   const output_hash = hashOutput(partial);
@@ -118,7 +116,7 @@ function buildAttestation(
   const simulated = !tee;
 
   return {
-    provider: tee ? 'outlayer-intel-tdx' : 'local-dev',
+    provider,
     code_measurement: codeMeasurement,
     execution_timestamp,
     input_hash,
@@ -162,9 +160,9 @@ export function applyRealtimeLag(series: SeriesPoint[], unlocked: boolean): {
 export function analyzeMergedSeries(
   series: SeriesPoint[],
   input: ThesisInput,
-  options?: { tee?: boolean; factors?: ThesisFactors },
+  options?: { tee?: boolean; factors?: ThesisFactors; provider?: AttestationBundle['provider'] },
 ): ThesisResult {
-  const window = input.smoothing_window ?? 1;
+  const window = clampSmoothingWindow(input.smoothing_window);
   const mode: StrategyMode = input.strategy_mode ?? 'public';
   const code = input.code_measurement ?? DEFAULT_CODE_MEASUREMENT;
   const tvlWeight = normalizeTvlWeight(input.tvl_weight);
@@ -189,7 +187,9 @@ export function analyzeMergedSeries(
   const { series: displaySeries, lagged } = applyRealtimeLag(series, unlocked);
 
   const partial = { series: displaySeries, conclusion };
-  const attestation = buildAttestation(input, partial, code, options?.tee ?? false);
+  const tee = options?.tee ?? false;
+  const provider = options?.provider ?? (tee ? 'outlayer-intel-tdx' : 'local-dev');
+  const attestation = buildAttestation(input, partial, code, tee, provider);
 
   const snapshot: SnapshotRecord = {
     id: `${attestation.execution_timestamp}-${attestation.input_hash.slice(0, 8)}`,
@@ -216,7 +216,7 @@ export function analyzeMergedSeries(
 
   return {
     thesis_title: 'NEAR multi-factor verifiable thesis (re-run + backtest)',
-    input: { ...input, tvl_weight: tvlWeight },
+    input: { ...input, smoothing_window: window, tvl_weight: tvlWeight },
     conclusion,
     series: displaySeries,
     series_lagged: lagged,

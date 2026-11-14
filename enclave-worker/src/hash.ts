@@ -1,5 +1,8 @@
 import { createHash } from 'node:crypto';
+import { clampSmoothingWindow, normalizeTvlWeight } from './input';
 import type { ThesisInput } from './types';
+
+export const SHA256_HEX_RE = /^[0-9a-f]{64}$/;
 
 export function stableStringify(value: unknown): string {
   if (value === null || typeof value !== 'object') {
@@ -18,13 +21,14 @@ export function sha256Hex(payload: string): string {
   return createHash('sha256').update(payload).digest('hex');
 }
 
+/** Hashes the canonical (clamped) parameters — must stay in sync with `hash_thesis_input` in main.rs. */
 export function hashThesisInput(input: ThesisInput): string {
   return sha256Hex(
     stableStringify({
       timeframe: input.timeframe,
       target_token: input.target_token,
-      smoothing_window: input.smoothing_window ?? 1,
-      tvl_weight: Math.round((input.tvl_weight ?? 0.5) * 1000) / 1000,
+      smoothing_window: clampSmoothingWindow(input.smoothing_window),
+      tvl_weight: normalizeTvlWeight(input.tvl_weight),
       strategy_mode: input.strategy_mode ?? 'public',
       realtime_unlocked: Boolean(input.realtime_unlocked),
     }),

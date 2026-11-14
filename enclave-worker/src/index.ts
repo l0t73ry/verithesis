@@ -25,6 +25,7 @@ export {
   defiLlamaNearTvlUrl,
 } from './data-sources';
 export { hashThesisInput, hashOutput, sha256Hex, stableStringify } from './hash';
+export { parseThesisInput } from './input';
 export { buildRunReceipt, type RunReceipt } from './receipt';
 export { callOutLayerThesis, isOutLayerConfigured } from './outlayer-coordinator';
 export { runThesisInLocalTee, wasmArtifactAvailable } from './local-tee';

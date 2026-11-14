@@ -20,6 +20,7 @@ import {
 } from './fetcher';
 import { analyzeMergedSeries } from './analyzer';
 import { loadThesisFactors } from './factors';
+import { clampSmoothingWindow, normalizeTvlWeight } from './input';
 import type { ThesisInput, ThesisResult, SeriesPoint } from './types';
 
 const BUNDLED_WASM_REL = join('enclave-worker', 'wasm', 'verithesis-wasi.wasm');
@@ -65,14 +66,14 @@ export function wasmCodeMeasurement(): string | null {
   return `wasm:sha256:${createHash('sha256').update(buf).digest('hex')}`;
 }
 
-type WasmAnalyzePayload = {
+export type WasmAnalyzePayload = {
   input: ThesisInput;
   series: SeriesPoint[];
   factors?: import('./factors').ThesisFactors;
   sealed_bias?: number;
 };
 
-type WasmAnalyzeOutput = {
+export type WasmAnalyzeOutput = {
   input_hash: string;
   output_hash: string;
   conclusion: ThesisResult['conclusion'];
@@ -94,7 +95,7 @@ function getWasmModule(wasmPath: string): WebAssembly.Module {
   return mod;
 }
 
-function runWasmAnalyzer(payload: WasmAnalyzePayload): Promise<WasmAnalyzeOutput> {
+export async function runWasmAnalyzer(payload: WasmAnalyzePayload): Promise<WasmAnalyzeOutput> {
   const wasmPath = repoWasmPath();
   const dir = mkdtempSync(join(tmpdir(), 'vt-wasi-'));
   const inPath = join(dir, 'in.json');
@@ -115,7 +116,13 @@ function runWasmAnalyzer(payload: WasmAnalyzePayload): Promise<WasmAnalyzeOutput
     });
     const mod = getWasmModule(wasmPath);
     const instance = new WebAssembly.Instance(mod, wasi.getImportObject() as WebAssembly.Imports);
-    wasi.start(instance);
+    try {
+      wasi.start(instance);
+    } catch (e) {
+      // Surface the guest's own error text (e.g. "series.len() < 3") instead of a bare trap.
+      const guestErr = readFileSync(errPath, 'utf8').trim();
+      throw new Error(guestErr || (e instanceof Error ? e.message : 'WASM execution failed'));
+    }
   } finally {
     try {
       closeSync(stdinFd);
@@ -144,19 +151,27 @@ function runWasmAnalyzer(payload: WasmAnalyzePayload): Promise<WasmAnalyzeOutput
     if (!parsed.output_hash || !parsed.input_hash) {
       throw new Error('WASM output missing hashes');
     }
-    return Promise.resolve(parsed);
+    return parsed;
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
 }
 
-/** Local TEE path: pin WASM measurement, optional wasmtime gate, then analyze with tee attestation. */
+/**
+ * Local WASI path: measure the module, run it as a hash gate, then analyze on the host.
+ * This is a *logical* enclave only (provider `local-wasi`) — no hardware attestation.
+ * Set `VERITHESIS_EXPECTED_WASM_SHA256` to pin the module; any other binary is rejected.
+ */
 export async function runThesisInLocalTee(input: ThesisInput): Promise<ThesisResult> {
   const measurement = wasmCodeMeasurement();
   if (!measurement) {
     throw new Error(
       'WASI module missing. Run: ./outlayer/build-wasm.sh (requires Rust + wasm32-wasip1 + wasmtime)',
     );
+  }
+  const expected = process.env.VERITHESIS_EXPECTED_WASM_SHA256?.trim().toLowerCase();
+  if (expected && measurement !== `wasm:sha256:${expected}`) {
+    throw new Error(`WASI module measurement mismatch (got ${measurement}, expected sha256 ${expected})`);
   }
 
   const days = timeframeToDays(input.timeframe);
@@ -174,8 +189,8 @@ export async function runThesisInLocalTee(input: ThesisInput): Promise<ThesisRes
     input: {
       timeframe: input.timeframe,
       target_token: input.target_token,
-      smoothing_window: input.smoothing_window,
-      tvl_weight: input.tvl_weight,
+      smoothing_window: clampSmoothingWindow(input.smoothing_window),
+      tvl_weight: normalizeTvlWeight(input.tvl_weight),
       strategy_mode: input.strategy_mode,
       realtime_unlocked: input.realtime_unlocked,
     },
@@ -184,11 +199,14 @@ export async function runThesisInLocalTee(input: ThesisInput): Promise<ThesisRes
     sealed_bias: wasmSealedBias(),
   };
 
-  const host = analyzeMergedSeries(series, { ...input, code_measurement: measurement }, { tee: true, factors });
+  const hostInput = { ...input, code_measurement: measurement };
 
   if (process.env.VERITHESIS_WASM_SKIP_GATE === '1') {
-    return host;
+    // Gate skipped: nothing ran inside the module, so do not present this as an enclave run.
+    return analyzeMergedSeries(series, hostInput, { tee: false, factors });
   }
+
+  const host = analyzeMergedSeries(series, hostInput, { tee: true, factors, provider: 'local-wasi' });
 
   const wasm = await runWasmAnalyzer(wasmPayload);
   if (wasm.input_hash !== host.attestation.input_hash || wasm.output_hash !== host.attestation.output_hash) {

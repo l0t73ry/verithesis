@@ -30,6 +30,18 @@ describe('parseNaturalQuery', () => {
     });
   });
 
+  it('recognises CJK time words at end of sentence and next to CJK text', () => {
+    assert.equal(parseNaturalQuery('最近7天').timeframe, '7d');
+    assert.equal(parseNaturalQuery('看看最近一周').timeframe, '7d');
+    assert.equal(parseNaturalQuery('三个月').timeframe, '90d');
+    assert.equal(parseNaturalQuery('回测一个月的NEAR').timeframe, '30d');
+  });
+
+  it('does not match digits embedded in larger numbers or words', () => {
+    assert.equal(parseNaturalQuery('170d').timeframe, undefined);
+    assert.equal(parseNaturalQuery('nearby').target_token, undefined);
+  });
+
   it('returns empty for unrelated text', () => {
     assert.deepEqual(parseNaturalQuery('what is the meaning of life'), {});
   });

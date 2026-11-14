@@ -1,3 +1,5 @@
+import { SHA256_HEX_RE, hashOutput, hashThesisInput } from './hash';
+import { fetchWithTimeout } from './http';
 import type { AttestationBundle, ThesisInput, ThesisResult } from './types';
 
 export type OutLayerCallEnvelope = {
@@ -11,12 +13,37 @@ export type OutLayerCallEnvelope = {
   code_measurement?: string;
 };
 
+const OUTLAYER_TIMEOUT_MS = Number.parseInt(process.env.OUTLAYER_TIMEOUT_MS ?? '60000', 10) || 60_000;
+const MAX_ERROR_LEN = 200;
+
 function isThesisResult(v: unknown): v is ThesisResult {
   if (!v || typeof v !== 'object') return false;
   const o = v as Record<string, unknown>;
-  return Boolean(o.attestation && o.conclusion && o.series);
+  return Boolean(o.attestation && o.conclusion && Array.isArray(o.series));
 }
 
+/**
+ * The coordinator is a remote, untrusted party: re-derive both hashes locally and require them
+ * to match what it claims, and to match the input *we* sent. Also guarantees the hashes are
+ * plain hex (they are later used as archive file names).
+ */
+function assertRemoteResultConsistent(result: ThesisResult, requested: ThesisInput) {
+  const { input_hash, output_hash } = result.attestation;
+  if (!SHA256_HEX_RE.test(input_hash ?? '') || !SHA256_HEX_RE.test(output_hash ?? '')) {
+    throw new Error('OutLayer result has malformed attestation hashes');
+  }
+  if (hashThesisInput(requested) !== input_hash) {
+    throw new Error('OutLayer result input_hash does not match the submitted input');
+  }
+  if (hashOutput({ series: result.series, conclusion: result.conclusion }) !== output_hash) {
+    throw new Error('OutLayer result output_hash does not match its series/conclusion');
+  }
+}
+
+/**
+ * Attach the TDX quote when present. The quote is NOT verified here (no DCAP / report_data
+ * binding yet), so status stays `pending` — never claim `verified` without a verifier.
+ */
 function mergeTeeAttestation(result: ThesisResult, envelope: OutLayerCallEnvelope): ThesisResult {
   const quoteB64 =
     envelope.attestation?.tdx_quote_b64 ??
@@ -27,23 +54,18 @@ function mergeTeeAttestation(result: ThesisResult, envelope: OutLayerCallEnvelop
     envelope.attestation?.code_measurement ??
     result.attestation.code_measurement;
 
-  const quoteStatus = quoteB64 ? ('verified' as const) : ('pending' as const);
-
   const attestation: AttestationBundle = {
     ...result.attestation,
     provider: 'outlayer-intel-tdx',
     code_measurement: code,
     quote: {
       ...result.attestation.quote,
-      status: quoteStatus,
+      status: 'pending',
       tdx_quote_b64: quoteB64,
       verifier_hint: quoteB64
-        ? 'TDX quote included. Verify with Intel DCAP or OutLayer published verifier.'
+        ? 'TDX quote attached but NOT verified by this server. Verify with Intel DCAP or the OutLayer published verifier (report_data must bind output_hash).'
         : result.attestation.quote.verifier_hint,
     },
-    signature_chain: result.attestation.signature_chain.map((step, i) =>
-      i < 2 && quoteB64 ? { ...step, status: 'pass' as const, detail: step.detail || 'TEE quote bound' } : step,
-    ),
   };
 
   return { ...result, attestation };
@@ -59,22 +81,23 @@ export async function callOutLayerThesis(input: ThesisInput): Promise<ThesisResu
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (paymentKey) headers['X-Payment-Key'] = paymentKey;
 
-  const res = await fetch(`${base}/call/${encodeURIComponent(project)}`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ input }),
-  });
+  const res = await fetchWithTimeout(
+    `${base}/call/${encodeURIComponent(project)}`,
+    { method: 'POST', headers, body: JSON.stringify({ input }) },
+    OUTLAYER_TIMEOUT_MS,
+  );
 
   const raw = (await res.json().catch(() => ({}))) as OutLayerCallEnvelope & Record<string, unknown>;
   if (!res.ok) {
     const msg = typeof raw.error === 'string' ? raw.error : res.statusText;
-    throw new Error(`OutLayer call failed: ${msg}`);
+    throw new Error(`OutLayer call failed: ${msg.slice(0, MAX_ERROR_LEN)}`);
   }
 
   const payload = raw.output ?? raw.result ?? raw;
   if (!isThesisResult(payload)) {
     throw new Error('OutLayer response missing thesis result JSON');
   }
+  assertRemoteResultConsistent(payload, input);
 
   return mergeTeeAttestation(payload, raw);
 }

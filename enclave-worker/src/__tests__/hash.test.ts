@@ -38,6 +38,14 @@ describe('hashThesisInput', () => {
     assert.notEqual(a, c);
   });
 
+  it('hashes the canonical (clamped) parameters, same as the WASI module', () => {
+    assert.equal(hashThesisInput({ ...base, smoothing_window: 15 }), hashThesisInput({ ...base, smoothing_window: 14 }));
+    assert.equal(hashThesisInput({ ...base, smoothing_window: 0 }), hashThesisInput({ ...base, smoothing_window: 1 }));
+    assert.equal(hashThesisInput({ ...base, smoothing_window: Number.NaN }), hashThesisInput(base));
+    assert.equal(hashThesisInput({ ...base, tvl_weight: 5 }), hashThesisInput({ ...base, tvl_weight: 0.8 }));
+    assert.notEqual(hashThesisInput({ ...base, smoothing_window: 7 }), hashThesisInput(base));
+  });
+
   it('changes when timeframe changes', () => {
     const a = hashThesisInput(base);
     const b = hashThesisInput({ ...base, timeframe: '7d' });

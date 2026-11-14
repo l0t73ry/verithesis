@@ -38,7 +38,12 @@ export interface ThesisConclusion {
 }
 
 export interface AttestationBundle {
-  provider: 'outlayer-intel-tdx' | 'local-dev';
+  /**
+   * - `outlayer-intel-tdx`: executed by an OutLayer coordinator (hardware quote may still be unverified).
+   * - `local-wasi`: WASI module gate on this host — logical enclave only, no hardware attestation.
+   * - `local-dev`: plain Node run.
+   */
+  provider: 'outlayer-intel-tdx' | 'local-wasi' | 'local-dev';
   code_measurement: string;
   execution_timestamp: string;
   input_hash: string;

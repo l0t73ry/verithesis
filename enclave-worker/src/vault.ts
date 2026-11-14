@@ -14,13 +14,19 @@ export type VaultExecutionPlan = {
 };
 
 const MAX_TRADE = process.env.VERITHESIS_VAULT_MAX_NEAR ?? '0.1';
+const NETWORKS = ['near-testnet', 'near-mainnet'] as const;
+
+function vaultNetwork(): VaultExecutionPlan['network'] {
+  const n = process.env.VERITHESIS_VAULT_NETWORK;
+  return (NETWORKS as readonly string[]).includes(n ?? '') ? (n as VaultExecutionPlan['network']) : 'near-testnet';
+}
 
 /** Placeholder for OutLayer TEE wallet — returns an auditable plan, not a live tx. */
 export function planVaultExecution(result: ThesisResult): VaultExecutionPlan {
-  if (result.conclusion.signal !== 'bullish') {
+  if (result.conclusion.signal !== 'bullish' || !result.vault_eligible) {
     return {
       status: 'rejected',
-      reason: 'signal_not_bullish',
+      reason: result.conclusion.signal !== 'bullish' ? 'signal_not_bullish' : 'not_vault_eligible',
       network: 'near-testnet',
       dex: 'ref-finance',
       action: 'swap',
@@ -47,7 +53,7 @@ export function planVaultExecution(result: ThesisResult): VaultExecutionPlan {
   }
   return {
     status: 'planned',
-    network: (process.env.VERITHESIS_VAULT_NETWORK as 'near-mainnet') ?? 'near-testnet',
+    network: vaultNetwork(),
     dex: 'ref-finance',
     action: 'swap',
     from_token: 'NEAR',
