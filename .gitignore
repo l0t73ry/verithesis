@@ -9,3 +9,4 @@ outlayer/**/target/
 web-app/.data/
 *.tsbuildinfo
 
+.vercel/
