@@ -7,8 +7,13 @@
  *   # In web-app/.env.local set the same + NEXT_PUBLIC_OUTLAYER_ENABLED=true
  */
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
-import { runThesisAnalysis, type ThesisInput } from '../enclave-worker/src/index.ts';
+import { parseThesisInput, runThesisAnalysis, type ThesisInput } from '../enclave-worker/src/index.ts';
 import { runThesisInLocalTee, wasmArtifactAvailable } from '../enclave-worker/src/local-tee.ts';
+
+if (process.env.NODE_ENV === 'production') {
+  console.error('mock OutLayer coordinator must not run in production');
+  process.exit(1);
+}
 
 const PORT = Number.parseInt(process.env.MOCK_OUTLAYER_PORT ?? '8791', 10);
 const PROJECT = process.env.MOCK_OUTLAYER_PROJECT_ID ?? 'demo.near/verithesis';
@@ -45,16 +50,13 @@ createServer(async (req, res) => {
         send(res, 400, { error: 'missing input' });
         return;
       }
+      // Same strict parsing as the web API. The mock has no payment backend, so it simply echoes the
+      // already-server-decided unlock flag (it is part of input_hash); the measurement is never client-set.
       const thesisInput: ThesisInput = {
-        timeframe: (input.timeframe as '30d') ?? '30d',
-        target_token: (input.target_token as 'NEAR') ?? 'NEAR',
-        smoothing_window: Number(input.smoothing_window ?? 1),
-        tvl_weight: input.tvl_weight != null ? Number(input.tvl_weight) : 0.5,
-        strategy_mode: (input.strategy_mode as 'public') ?? 'public',
-        realtime_unlocked: Boolean(input.realtime_unlocked),
-        payment_receipt: (input.payment_receipt as string) ?? null,
-        code_measurement:
-          typeof input.code_measurement === 'string' ? input.code_measurement : 'mock-outlayer-coordinator',
+        ...parseThesisInput(input),
+        realtime_unlocked: input.realtime_unlocked === true,
+        payment_receipt: typeof input.payment_receipt === 'string' ? input.payment_receipt : null,
+        code_measurement: 'mock-outlayer-coordinator',
       };
       const base = wasmArtifactAvailable()
         ? await runThesisInLocalTee(thesisInput)
@@ -66,13 +68,10 @@ createServer(async (req, res) => {
           provider: 'outlayer-intel-tdx' as const,
           quote: {
             ...base.attestation.quote,
-            status: 'verified' as const,
+            status: 'simulated' as const,
             tdx_quote_b64: MOCK_QUOTE,
-            verifier_hint: 'Mock OutLayer coordinator (local). Replace with hardware TDX quote in production.',
+            verifier_hint: 'Mock OutLayer coordinator (local). The quote is fake — replace with a hardware TDX quote in production.',
           },
-          signature_chain: base.attestation.signature_chain.map((step, i) =>
-            i < 2 ? { ...step, status: 'pass' as const } : step,
-          ),
         },
       };
       send(res, 200, {
@@ -90,7 +89,7 @@ createServer(async (req, res) => {
     const message = e instanceof Error ? e.message : String(e);
     send(res, 500, { error: message });
   }
-}).listen(PORT, () => {
+}).listen(PORT, '127.0.0.1', () => {
   // eslint-disable-next-line no-console
   console.log(`mock OutLayer coordinator http://127.0.0.1:${PORT}/call/${PROJECT}`);
 });

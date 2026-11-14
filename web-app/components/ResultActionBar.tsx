@@ -132,7 +132,7 @@ export function ResultActionBar({
       const res = await fetch('/api/thesis/vault', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ result }),
+        body: JSON.stringify({ output_hash: result.attestation.output_hash }),
       });
       if (!res.ok) throw new Error('vault');
       const data = await res.json();

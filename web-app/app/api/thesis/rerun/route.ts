@@ -1,42 +1,46 @@
-import { runThesisAnalysis } from '@verithesis/enclave-worker';
-import type { StrategyMode, TargetToken, ThesisInput, Timeframe } from '@verithesis/enclave-worker';
+import { parseThesisInput, runThesisAnalysis } from '@verithesis/enclave-worker';
+import type { ThesisInput } from '@verithesis/enclave-worker';
 import { archiveRun } from '@/lib/run-archive';
+import { isPaymentReceiptValid } from '@/lib/payment';
+import { envLimit, rateLimit } from '@/lib/rate-limit';
 import { appendSnapshot } from '@/lib/snapshots';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+// Upstream fetches (CoinGecko + DefiLlama + GitHub) plus the WASM gate can exceed Vercel's 10s default.
+export const maxDuration = 30;
+
+const RERUN_LIMIT_PER_MIN = envLimit('VERITHESIS_RATE_LIMIT_RERUN_PER_MIN', 20);
+// TEE runs spend the server's paid OutLayer key / WASM CPU — keep them on a tighter budget.
+const TEE_LIMIT_PER_MIN = envLimit('VERITHESIS_RATE_LIMIT_TEE_PER_MIN', 6);
 
 function parseBody(body: unknown): ThesisInput & { tee: boolean } {
+  const params = parseThesisInput(body);
   const o = body as Record<string, unknown>;
-  const timeframe = (o.timeframe ?? '30d') as Timeframe;
-  const target_token = (o.target_token ?? 'NEAR') as TargetToken;
-  const smoothing_window = o.smoothing_window != null ? Number(o.smoothing_window) : 1;
-  const tvl_weight = o.tvl_weight != null ? Number(o.tvl_weight) : 0.5;
-  const strategy_mode = (o.strategy_mode ?? 'public') as StrategyMode;
-  const payment_receipt = (o.payment_receipt as string) ?? null;
-  const realtime_unlocked =
-    Boolean(o.realtime_unlocked) ||
-    (typeof payment_receipt === 'string' && payment_receipt.length > 0);
-  const tee = Boolean(o.tee);
-  if (!['7d', '30d', '90d'].includes(timeframe)) throw new Error('Invalid timeframe');
-  if (!['NEAR', 'REF'].includes(target_token)) throw new Error('Invalid target_token');
+  // Realtime access is decided by the server from the receipt; `realtime_unlocked` in the body
+  // is deliberately ignored.
+  const payment_receipt = isPaymentReceiptValid(o.payment_receipt) ? o.payment_receipt : null;
   return {
-    timeframe,
-    target_token,
-    smoothing_window,
-    tvl_weight: Math.max(0.2, Math.min(0.8, tvl_weight)),
-    strategy_mode,
-    realtime_unlocked,
+    ...params,
+    realtime_unlocked: payment_receipt !== null,
     payment_receipt,
-    tee,
+    tee: o.tee === true,
   };
 }
 
 export async function POST(req: Request) {
   try {
+    const limited = rateLimit(req, 'rerun', RERUN_LIMIT_PER_MIN);
+    if (limited) return limited;
+
     const body = await req.json();
     const parsed = parseBody(body);
     const { tee, ...input } = parsed;
+    if (tee) {
+      const teeLimited = rateLimit(req, 'rerun-tee', TEE_LIMIT_PER_MIN);
+      if (teeLimited) return teeLimited;
+    }
+
     const code_measurement =
       process.env.VERITHESIS_CODE_MEASUREMENT ?? process.env.VERCEL_GIT_COMMIT_SHA ?? undefined;
     const result = await runThesisAnalysis({ ...input, code_measurement }, { tee });

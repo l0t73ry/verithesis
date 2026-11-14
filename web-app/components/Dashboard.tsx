@@ -170,7 +170,7 @@ export function Dashboard() {
         smoothing_window: overrides?.smoothing_window ?? smoothing,
         tvl_weight: overrides?.tvl_weight ?? tvlWeightPct / 100,
         strategy_mode: overrides?.strategy_mode ?? strategyMode,
-        realtime_unlocked: overrides?.realtime_unlocked ?? realtimeUnlocked,
+        // The server decides realtime access from the receipt (demo stub); no client-side flag.
         payment_receipt: overrides?.realtime_unlocked || realtimeUnlocked ? 'demo-near-0.1' : null,
         tee: runInTee,
       };
