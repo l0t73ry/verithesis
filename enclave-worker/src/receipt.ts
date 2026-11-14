@@ -1,4 +1,10 @@
-import type { AttestationBundle, ThesisConclusion, ThesisInput, ThesisResult } from './types';
+import type {
+  AttestationBundle,
+  NearOnchainTelemetry,
+  ThesisConclusion,
+  ThesisInput,
+  ThesisResult,
+} from './types';
 
 export interface RunReceipt {
   schema: 'verithesis-run-receipt@v1';
@@ -16,13 +22,17 @@ export interface RunReceipt {
     ThesisConclusion,
     'signal' | 'sharpe_ratio' | 'strategy_return_pct' | 'buy_hold_return_pct' | 'headline'
   >;
+  near_onchain?: Pick<
+    NearOnchainTelemetry,
+    'block_height' | 'block_hash' | 'active_validators' | 'total_staked_mnear' | 'staking_ratio_pct'
+  >;
   snapshot_id?: string;
   /** Relative share path; host is deployment-specific. */
   verify_path: string;
 }
 
 export function buildRunReceipt(result: ThesisResult): RunReceipt {
-  const { attestation, input, conclusion, snapshot } = result;
+  const { attestation, input, conclusion, snapshot, near_onchain } = result;
   return {
     schema: 'verithesis-run-receipt@v1',
     execution_timestamp: attestation.execution_timestamp,
@@ -46,6 +56,17 @@ export function buildRunReceipt(result: ThesisResult): RunReceipt {
       buy_hold_return_pct: conclusion.buy_hold_return_pct,
       headline: conclusion.headline,
     },
+    ...(near_onchain
+      ? {
+          near_onchain: {
+            block_height: near_onchain.block_height,
+            block_hash: near_onchain.block_hash,
+            active_validators: near_onchain.active_validators,
+            total_staked_mnear: near_onchain.total_staked_mnear,
+            staking_ratio_pct: near_onchain.staking_ratio_pct,
+          },
+        }
+      : {}),
     snapshot_id: snapshot?.id,
     verify_path: `/?run=${attestation.output_hash}`,
   };

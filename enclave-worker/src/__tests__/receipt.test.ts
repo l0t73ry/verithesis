@@ -59,4 +59,28 @@ test('buildRunReceipt', () => {
   assert.equal(r.output_hash, 'b'.repeat(64));
   assert.equal(r.verify_path, `/?run=${'b'.repeat(64)}`);
   assert.equal(r.snapshot_id, '2024-input');
+  assert.equal(r.near_onchain, undefined);
+});
+
+test('buildRunReceipt includes near_onchain anchor when present', () => {
+  const withChain = minimalResult();
+  withChain.near_onchain = {
+    rpc_endpoint: 'https://rpc.mainnet.fastnear.com',
+    chain_id: 'mainnet',
+    block_height: 224_490_284,
+    block_hash: 'EFYPEMxCsrk4SiVcCEXJM9Pgud5RC5BxtPF1Qbru8rC1',
+    protocol_version: 88,
+    active_validators: 345,
+    total_staked_mnear: 589.1,
+    total_supply_mnear: 1311.7,
+    staking_ratio_pct: 44.9,
+  };
+  const r = buildRunReceipt(withChain);
+  assert.deepEqual(r.near_onchain, {
+    block_height: 224_490_284,
+    block_hash: 'EFYPEMxCsrk4SiVcCEXJM9Pgud5RC5BxtPF1Qbru8rC1',
+    active_validators: 345,
+    total_staked_mnear: 589.1,
+    staking_ratio_pct: 44.9,
+  });
 });

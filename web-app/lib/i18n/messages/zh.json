@@ -29,6 +29,9 @@
     "signal": "信号",
     "metricsR": "R / R²",
     "hitRate": "同向命中率",
+    "nearValidators": "活跃验证节点",
+    "nearStakedRatio": "NEAR 质押率",
+    "nearFinalBlock": "敲定区块高度",
     "snapshotsTitle": "历史运行",
     "snapshotOut": "输出",
     "github": "源代码",
@@ -74,6 +77,7 @@
     "executionTimestamp": "执行时间",
     "inputHash": "输入哈希",
     "outputHash": "输出哈希",
+    "nearAnchor": "NEAR 主网区块锚定",
     "tdxQuote": "TDX 报价 (base64)",
     "signatureChain": "签名链",
     "close": "关闭",
@@ -111,7 +115,9 @@
   "results": {
     "expandMetrics": "展开相关性与命中率",
     "trustLine": "输入 {hash}… · {provider} · 报价 {quote} — 查看证明",
-    "factorDemo": "funding / 巨鲸：演示合成数据"
+    "factorDemo": "funding / 巨鲸：演示合成数据",
+    "nearValidatorsTag": "NEAR #{height} · {validators} 验证节点",
+    "nearStakeTag": "质押 {staked}M NEAR ({ratio}%)"
   },
   "vault": {
     "drawerTitle": "TEE 金库执行计划",

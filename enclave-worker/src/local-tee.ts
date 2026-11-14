@@ -21,6 +21,7 @@ import {
 import { analyzeMergedSeries } from './analyzer';
 import { loadThesisFactors } from './factors';
 import { clampSmoothingWindow, normalizeTvlWeight } from './input';
+import { fetchNearOnchainTelemetrySafe } from './near-rpc';
 import type { ThesisInput, ThesisResult, SeriesPoint } from './types';
 
 const BUNDLED_WASM_REL = join('enclave-worker', 'wasm', 'verithesis-wasi.wasm');
@@ -175,9 +176,10 @@ export async function runThesisInLocalTee(input: ThesisInput): Promise<ThesisRes
   }
 
   const days = timeframeToDays(input.timeframe);
-  const [prices, tvls] = await Promise.all([
+  const [prices, tvls, near_onchain] = await Promise.all([
     fetchPriceSeries(input.target_token, days),
     fetchNearTvlSeries(days),
+    fetchNearOnchainTelemetrySafe(),
   ]);
   const series: SeriesPoint[] = mergeSeries(prices, tvls);
   if (series.length < 3) {
@@ -203,10 +205,15 @@ export async function runThesisInLocalTee(input: ThesisInput): Promise<ThesisRes
 
   if (process.env.VERITHESIS_WASM_SKIP_GATE === '1') {
     // Gate skipped: nothing ran inside the module, so do not present this as an enclave run.
-    return analyzeMergedSeries(series, hostInput, { tee: false, factors });
+    return analyzeMergedSeries(series, hostInput, { tee: false, factors, near_onchain });
   }
 
-  const host = analyzeMergedSeries(series, hostInput, { tee: true, factors, provider: 'local-wasi' });
+  const host = analyzeMergedSeries(series, hostInput, {
+    tee: true,
+    factors,
+    provider: 'local-wasi',
+    near_onchain,
+  });
 
   const wasm = await runWasmAnalyzer(wasmPayload);
   if (wasm.input_hash !== host.attestation.input_hash || wasm.output_hash !== host.attestation.output_hash) {

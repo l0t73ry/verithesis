@@ -29,6 +29,9 @@
     "signal": "Signal",
     "metricsR": "R / R²",
     "hitRate": "Hit rate",
+    "nearValidators": "Active validators",
+    "nearStakedRatio": "NEAR staked",
+    "nearFinalBlock": "Finalized block",
     "snapshotsTitle": "Run history",
     "snapshotOut": "Output",
     "github": "Source code",
@@ -74,6 +77,7 @@
     "executionTimestamp": "Execution time",
     "inputHash": "Input hash",
     "outputHash": "Output hash",
+    "nearAnchor": "NEAR mainnet block anchor",
     "tdxQuote": "TDX quote (base64)",
     "signatureChain": "Signature chain",
     "close": "Close",
@@ -111,7 +115,9 @@
   "results": {
     "expandMetrics": "More correlation & hit-rate metrics",
     "trustLine": "input {hash}… · {provider} · quote {quote} — open attestation",
-    "factorDemo": "funding / whale: demo synthetic"
+    "factorDemo": "funding / whale: demo synthetic",
+    "nearValidatorsTag": "NEAR #{height} · {validators} validators",
+    "nearStakeTag": "Staked {staked}M NEAR ({ratio}%)"
   },
   "vault": {
     "drawerTitle": "TEE vault execution plan",

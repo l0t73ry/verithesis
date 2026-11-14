@@ -67,6 +67,23 @@ export interface SnapshotRecord {
   target_token: TargetToken;
 }
 
+export interface NearOnchainTelemetry {
+  /** JSON-RPC endpoint that served the snapshot (`docs.near.org/api/rpc/providers`). */
+  rpc_endpoint: string;
+  chain_id: 'mainnet';
+  block_height: number;
+  block_hash: string;
+  protocol_version: number;
+  epoch_height?: number;
+  active_validators: number;
+  /** Total NEAR staked across current active validators (millions of NEAR, 1 decimal). */
+  total_staked_mnear: number;
+  /** Total NEAR L1 circulating/minted supply from finalized block header (millions of NEAR, 1 decimal). */
+  total_supply_mnear: number;
+  /** `total_staked / total_supply * 100` (1 decimal). */
+  staking_ratio_pct: number;
+}
+
 export interface ThesisResult {
   thesis_title: string;
   input: ThesisInput;
@@ -77,6 +94,8 @@ export interface ThesisResult {
   data_sources: string[];
   snapshot?: SnapshotRecord;
   strategy_mode: StrategyMode;
+  /** Live NEAR Mainnet consensus & staking fundamentals anchored via JSON-RPC at run time. */
+  near_onchain?: NearOnchainTelemetry;
   /** Strong bullish + env gate — UI may offer TEE vault plan */
   vault_eligible?: boolean;
 }

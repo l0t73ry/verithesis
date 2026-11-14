@@ -29,6 +29,9 @@
     "signal": "Сигнал",
     "metricsR": "R / R²",
     "hitRate": "Точность",
+    "nearValidators": "Валидаторы",
+    "nearStakedRatio": "В стейкинге NEAR",
+    "nearFinalBlock": "Финализированный блок",
     "snapshotsTitle": "История запусков",
     "snapshotOut": "Выход",
     "github": "Исходный код",
@@ -74,6 +77,7 @@
     "executionTimestamp": "Время выполнения",
     "inputHash": "Хеш входа",
     "outputHash": "Хеш выхода",
+    "nearAnchor": "Якорь блока NEAR mainnet",
     "tdxQuote": "TDX quote (base64)",
     "signatureChain": "Цепочка подписей",
     "close": "Закрыть",
@@ -111,7 +115,9 @@
   "results": {
     "expandMetrics": "Корреляция и точность",
     "trustLine": "вход {hash}… · {provider} · quote {quote} — открыть аттестацию",
-    "factorDemo": "funding / whale: демо-синтетика"
+    "factorDemo": "funding / whale: демо-синтетика",
+    "nearValidatorsTag": "NEAR #{height} · {validators} валидаторов",
+    "nearStakeTag": "Стейк {staked}M NEAR ({ratio}%)"
   },
   "vault": {
     "drawerTitle": "План исполнения TEE vault",

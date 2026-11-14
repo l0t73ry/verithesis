@@ -1,17 +1,19 @@
 'use client';
 
 import { List, Modal, Tag, Typography } from 'antd';
-import type { AttestationBundle } from '@verithesis/enclave-worker';
+import type { AttestationBundle, NearOnchainTelemetry } from '@verithesis/enclave-worker';
 import { useI18n } from '@/lib/i18n/context';
 
 export function AttestationModal({
   open,
   onClose,
   attestation,
+  nearOnchain,
 }: {
   open: boolean;
   onClose: () => void;
   attestation: AttestationBundle | null;
+  nearOnchain?: NearOnchainTelemetry;
 }) {
   const { t } = useI18n();
 
@@ -42,6 +44,12 @@ export function AttestationModal({
             <HashRow label={t('attestation.executionTimestamp')} value={attestation.execution_timestamp} />
             <HashRow label={t('attestation.inputHash')} value={attestation.input_hash} accent />
             <HashRow label={t('attestation.outputHash')} value={attestation.output_hash} warn />
+            {nearOnchain ? (
+              <HashRow
+                label={t('attestation.nearAnchor')}
+                value={`#${nearOnchain.block_height} · ${nearOnchain.block_hash} (${nearOnchain.active_validators} validators, ${nearOnchain.staking_ratio_pct}% staked)`}
+              />
+            ) : null}
             {attestation.quote.tdx_quote_b64 ? (
               <HashRow
                 label={t('attestation.tdxQuote')}

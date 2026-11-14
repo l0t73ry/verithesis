@@ -101,6 +101,22 @@ export function ThesisResultSummary({
           {copy.summary}
         </Typography.Paragraph>
         <Space size={6} wrap>
+          {result.near_onchain ? (
+            <>
+              <Tag variant="filled" color="green">
+                {t('results.nearValidatorsTag', {
+                  height: result.near_onchain.block_height.toLocaleString(),
+                  validators: String(result.near_onchain.active_validators),
+                })}
+              </Tag>
+              <Tag variant="filled" color="geekblue">
+                {t('results.nearStakeTag', {
+                  staked: String(result.near_onchain.total_staked_mnear),
+                  ratio: String(result.near_onchain.staking_ratio_pct),
+                })}
+              </Tag>
+            </>
+          ) : null}
           <Tag variant="filled" color="cyan">
             GitHub {c.github_commits_7d ?? 0}/7d
           </Tag>
@@ -159,6 +175,33 @@ export function ThesisResultSummary({
                     styles={{ content: { fontSize: 18, color: '#94a3b8' } }}
                   />
                 </Col>
+                {result.near_onchain ? (
+                  <>
+                    <Col xs={12} sm={8}>
+                      <Statistic
+                        title={t('dashboard.nearValidators')}
+                        value={result.near_onchain.active_validators}
+                        styles={{ content: { fontFamily: 'var(--font-mono)', fontSize: 16 } }}
+                      />
+                    </Col>
+                    <Col xs={12} sm={8}>
+                      <Statistic
+                        title={t('dashboard.nearStakedRatio')}
+                        value={`${result.near_onchain.staking_ratio_pct}%`}
+                        suffix={`(${result.near_onchain.total_staked_mnear}M)`}
+                        styles={{ content: { fontFamily: 'var(--font-mono)', fontSize: 16 } }}
+                      />
+                    </Col>
+                    <Col xs={12} sm={8}>
+                      <Statistic
+                        title={t('dashboard.nearFinalBlock')}
+                        value={`#${result.near_onchain.block_height.toLocaleString()}`}
+                        suffix={`v${result.near_onchain.protocol_version}`}
+                        styles={{ content: { fontFamily: 'var(--font-mono)', fontSize: 15 } }}
+                      />
+                    </Col>
+                  </>
+                ) : null}
               </Row>
             ),
           },

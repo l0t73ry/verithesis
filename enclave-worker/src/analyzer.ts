@@ -5,6 +5,7 @@ import { backtestWeightedStrategy, buyAndHoldReturnPct } from './backtest';
 import type { ThesisFactors } from './factors';
 import type {
   AttestationBundle,
+  NearOnchainTelemetry,
   SeriesPoint,
   StrategyMode,
   ThesisConclusion,
@@ -160,7 +161,12 @@ export function applyRealtimeLag(series: SeriesPoint[], unlocked: boolean): {
 export function analyzeMergedSeries(
   series: SeriesPoint[],
   input: ThesisInput,
-  options?: { tee?: boolean; factors?: ThesisFactors; provider?: AttestationBundle['provider'] },
+  options?: {
+    tee?: boolean;
+    factors?: ThesisFactors;
+    provider?: AttestationBundle['provider'];
+    near_onchain?: NearOnchainTelemetry;
+  },
 ): ThesisResult {
   const window = clampSmoothingWindow(input.smoothing_window);
   const mode: StrategyMode = input.strategy_mode ?? 'public';
@@ -203,6 +209,9 @@ export function analyzeMergedSeries(
   };
 
   const data_sources = [
+    ...(options?.near_onchain
+      ? [`NEAR Mainnet JSON-RPC (block #${options.near_onchain.block_height}, ${options.near_onchain.active_validators} validators)`]
+      : []),
     `CoinGecko market_chart (${input.target_token})`,
     'DefiLlama historicalChainTvl/NEAR',
     'GitHub nearcore commits (7d, public API)',
@@ -224,6 +233,7 @@ export function analyzeMergedSeries(
     data_sources,
     snapshot,
     strategy_mode: mode,
+    ...(options?.near_onchain ? { near_onchain: options.near_onchain } : {}),
     vault_eligible,
   };
 }

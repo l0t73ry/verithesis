@@ -435,7 +435,12 @@ export function Dashboard() {
         </Flex>
       </Footer>
 
-      <AttestationModal open={modalOpen} onClose={() => setModalOpen(false)} attestation={result?.attestation ?? null} />
+      <AttestationModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        attestation={result?.attestation ?? null}
+        nearOnchain={result?.near_onchain}
+      />
     </Layout>
   );
 }

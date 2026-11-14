@@ -7,6 +7,7 @@ import {
 import { analyzeMergedSeries } from './analyzer';
 import { loadThesisFactors } from './factors';
 import { runThesisInLocalTee, wasmArtifactAvailable } from './local-tee';
+import { fetchNearOnchainTelemetrySafe } from './near-rpc';
 import { callOutLayerThesis, isOutLayerConfigured } from './outlayer-coordinator';
 import type { ThesisInput, ThesisResult } from './types';
 
@@ -23,7 +24,13 @@ export {
   MARKET_DATA_SOURCES,
   coingeckoMarketChartUrlByDays,
   defiLlamaNearTvlUrl,
+  nearMainnetRpcUrls,
 } from './data-sources';
+export {
+  fetchNearOnchainTelemetry,
+  fetchNearOnchainTelemetrySafe,
+  yoctoToMillionNear,
+} from './near-rpc';
 export { hashThesisInput, hashOutput, sha256Hex, stableStringify } from './hash';
 export { parseThesisInput } from './input';
 export { buildRunReceipt, type RunReceipt } from './receipt';
@@ -34,6 +41,7 @@ export { planVaultExecution } from './vault';
 export type { VaultExecutionPlan } from './vault';
 export type {
   AttestationBundle,
+  NearOnchainTelemetry,
   SeriesPoint,
   SnapshotRecord,
   StrategyMode,
@@ -50,9 +58,12 @@ export async function runThesisAnalysis(
 ): Promise<ThesisResult> {
   if (options?.tee) {
     if (isOutLayerConfigured()) {
-      const remote = await callOutLayerThesis(input);
-      if (remote) return remote;
-      throw new Error('OutLayer returned no result');
+      const [remote, near_onchain] = await Promise.all([
+        callOutLayerThesis(input),
+        fetchNearOnchainTelemetrySafe(),
+      ]);
+      if (!remote) throw new Error('OutLayer returned no result');
+      return near_onchain && !remote.near_onchain ? { ...remote, near_onchain } : remote;
     }
     if (wasmArtifactAvailable()) {
       return runThesisInLocalTee(input);
@@ -64,9 +75,10 @@ export async function runThesisAnalysis(
 
   const days = timeframeToDays(input.timeframe);
 
-  const [prices, tvls] = await Promise.all([
+  const [prices, tvls, near_onchain] = await Promise.all([
     fetchPriceSeries(input.target_token, days),
     fetchNearTvlSeries(days),
+    fetchNearOnchainTelemetrySafe(),
   ]);
 
   const series = mergeSeries(prices, tvls);
@@ -77,5 +89,5 @@ export async function runThesisAnalysis(
   }
 
   const factors = await loadThesisFactors(series);
-  return analyzeMergedSeries(series, input, { ...options, factors });
+  return analyzeMergedSeries(series, input, { ...options, factors, near_onchain });
 }

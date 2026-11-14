@@ -29,6 +29,9 @@
     "signal": "シグナル",
     "metricsR": "R / R²",
     "hitRate": "命中率",
+    "nearValidators": "バリデータ数",
+    "nearStakedRatio": "NEAR ステーキング率",
+    "nearFinalBlock": "確定ブロック",
     "snapshotsTitle": "実行履歴",
     "snapshotOut": "出力",
     "github": "ソースコード",
@@ -74,6 +77,7 @@
     "executionTimestamp": "実行時刻",
     "inputHash": "入力ハッシュ",
     "outputHash": "出力ハッシュ",
+    "nearAnchor": "NEAR メインネット・ブロックアンカー",
     "tdxQuote": "TDX クォート (base64)",
     "signatureChain": "署名チェーン",
     "close": "閉じる",
@@ -111,7 +115,9 @@
   "results": {
     "expandMetrics": "相関・命中率の詳細",
     "trustLine": "入力 {hash}… · {provider} · quote {quote} — 証明を開く",
-    "factorDemo": "funding / whale：デモ合成"
+    "factorDemo": "funding / whale：デモ合成",
+    "nearValidatorsTag": "NEAR #{height} · {validators} バリデータ",
+    "nearStakeTag": "ステーク {staked}M NEAR ({ratio}%)"
   },
   "vault": {
     "drawerTitle": "TEE ボールト実行計画",
