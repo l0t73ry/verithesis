@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['antd', '@ant-design/icons'],
   },
+  outputFileTracingIncludes: {
+    '/api/thesis/capabilities': ['../enclave-worker/wasm/verithesis-wasi.wasm', './public/verithesis-wasi.wasm'],
+    '/api/thesis/rerun': ['../enclave-worker/wasm/verithesis-wasi.wasm', './public/verithesis-wasi.wasm'],
+    '/api/thesis/verify': ['../enclave-worker/wasm/verithesis-wasi.wasm', './public/verithesis-wasi.wasm'],
+  },
 };
 
 export default nextConfig;

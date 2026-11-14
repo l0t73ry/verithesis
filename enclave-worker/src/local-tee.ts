@@ -1,7 +1,17 @@
 import { createHash } from 'node:crypto';
-import { spawn } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import {
+  closeSync,
+  existsSync,
+  mkdtempSync,
+  openSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { WASI } from 'node:wasi';
 import {
   fetchNearTvlSeries,
   fetchPriceSeries,
@@ -12,7 +22,8 @@ import { analyzeMergedSeries } from './analyzer';
 import { loadThesisFactors } from './factors';
 import type { ThesisInput, ThesisResult, SeriesPoint } from './types';
 
-const DEFAULT_WASM_REL = join(
+const BUNDLED_WASM_REL = join('enclave-worker', 'wasm', 'verithesis-wasi.wasm');
+const TARGET_WASM_REL = join(
   'outlayer',
   'verithesis-wasi',
   'target',
@@ -25,12 +36,21 @@ function repoWasmPath(): string {
   const fromEnv = process.env.VERITHESIS_WASM_PATH;
   if (fromEnv && existsSync(fromEnv)) return fromEnv;
   const cwd = process.cwd();
-  const candidates = [
-    join(cwd, DEFAULT_WASM_REL),
-    join(cwd, '..', DEFAULT_WASM_REL),
-    join(cwd, '..', '..', DEFAULT_WASM_REL),
+  const candidates: string[] = [
+    join(cwd, TARGET_WASM_REL),
+    join(cwd, '..', TARGET_WASM_REL),
+    join(cwd, BUNDLED_WASM_REL),
+    join(cwd, '..', BUNDLED_WASM_REL),
+    join(cwd, 'wasm', 'verithesis-wasi.wasm'),
+    join(cwd, 'public', 'verithesis-wasi.wasm'),
   ];
-  return candidates.find((p) => existsSync(p)) ?? candidates[0];
+  try {
+    const here = dirname(fileURLToPath(import.meta.url));
+    candidates.push(join(here, '..', 'wasm', 'verithesis-wasi.wasm'));
+  } catch {
+    /* ignore */
+  }
+  return candidates.find((p) => existsSync(p)) ?? candidates[0]!;
 }
 
 export function wasmArtifactAvailable(): boolean {
@@ -62,42 +82,71 @@ function wasmSealedBias(): number {
   return Number.isFinite(n) ? n : 0.08;
 }
 
+let cachedWasmModule: { path: string; mod: WebAssembly.Module } | null = null;
+
+function getWasmModule(wasmPath: string): WebAssembly.Module {
+  if (cachedWasmModule && cachedWasmModule.path === wasmPath) {
+    return cachedWasmModule.mod;
+  }
+  const mod = new WebAssembly.Module(readFileSync(wasmPath));
+  cachedWasmModule = { path: wasmPath, mod };
+  return mod;
+}
+
 function runWasmAnalyzer(payload: WasmAnalyzePayload): Promise<WasmAnalyzeOutput> {
-  const wasm = repoWasmPath();
-  return new Promise((resolve, reject) => {
-    const child = spawn('wasmtime', ['run', wasm, '--'], {
-      stdio: ['pipe', 'pipe', 'pipe'],
+  const wasmPath = repoWasmPath();
+  const dir = mkdtempSync(join(tmpdir(), 'vt-wasi-'));
+  const inPath = join(dir, 'in.json');
+  const outPath = join(dir, 'out.json');
+  const errPath = join(dir, 'err.txt');
+
+  writeFileSync(inPath, JSON.stringify(payload), 'utf8');
+  const stdinFd = openSync(inPath, 'r');
+  const stdoutFd = openSync(outPath, 'w');
+  const stderrFd = openSync(errPath, 'w');
+
+  try {
+    const wasi = new WASI({
+      version: 'preview1',
+      stdin: stdinFd,
+      stdout: stdoutFd,
+      stderr: stderrFd,
     });
-    let stderr = '';
-    let stdout = '';
-    child.stderr.on('data', (d) => {
-      stderr += d.toString();
-    });
-    child.stdout.on('data', (d) => {
-      stdout += d.toString();
-    });
-    child.on('error', (e) => {
-      reject(new Error(`wasmtime not found: ${e.message}`));
-    });
-    child.on('close', (code) => {
-      if (code !== 0) {
-        reject(new Error(stderr.trim() || `wasmtime exit ${code}`));
-        return;
-      }
-      try {
-        const parsed = JSON.parse(stdout.trim()) as WasmAnalyzeOutput;
-        if (!parsed.output_hash || !parsed.input_hash) {
-          reject(new Error('WASM output missing hashes'));
-          return;
-        }
-        resolve(parsed);
-      } catch {
-        reject(new Error(`Invalid WASM JSON: ${stdout.slice(0, 200)}`));
-      }
-    });
-    child.stdin.write(JSON.stringify(payload));
-    child.stdin.end();
-  });
+    const mod = getWasmModule(wasmPath);
+    const instance = new WebAssembly.Instance(mod, wasi.getImportObject() as WebAssembly.Imports);
+    wasi.start(instance);
+  } finally {
+    try {
+      closeSync(stdinFd);
+    } catch {
+      /* ignore */
+    }
+    try {
+      closeSync(stdoutFd);
+    } catch {
+      /* ignore */
+    }
+    try {
+      closeSync(stderrFd);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  try {
+    const stdout = readFileSync(outPath, 'utf8').trim();
+    const stderr = readFileSync(errPath, 'utf8').trim();
+    if (!stdout) {
+      throw new Error(stderr || 'Empty WASM output');
+    }
+    const parsed = JSON.parse(stdout) as WasmAnalyzeOutput;
+    if (!parsed.output_hash || !parsed.input_hash) {
+      throw new Error('WASM output missing hashes');
+    }
+    return Promise.resolve(parsed);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 }
 
 /** Local TEE path: pin WASM measurement, optional wasmtime gate, then analyze with tee attestation. */
