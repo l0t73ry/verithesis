@@ -18,7 +18,7 @@ npm run build:wasm
 npm run verify:wasm   # 固定 fixture 与 Node 交叉校验 output_hash
 ```
 
-`tee: true` 时 `local-tee.ts` 会 wasmtime 跑模块并 **强制** `output_hash` 与 Node 一致，否则拒绝返回。
+`tee: true` 时 `local-tee.ts` 用 node:wasi 跑模块（`provider: local-wasi`）并 **强制** `output_hash` 与 Node 一致，否则拒绝返回。
 
 ## Mock coordinator（P2 联调）
 

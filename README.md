@@ -20,13 +20,13 @@
 
 ```bash
 npm install
-npm run build:wasm   # 可选：本地「安全飞地」需要 wasmtime
+npm run build:wasm   # 可选：本地「安全飞地」（node:wasi 执行；wasmtime 仅用于 verify:wasm 交叉校验，可选）
 npm run dev          # http://localhost:5830
 ```
 
 ## 评委三步复现（本地）
 
-1. **运行分析**：`npm run dev` → 打开页面 → **运行分析**（可选打开 **安全飞地**，需已 `build:wasm` + `wasmtime`）。
+1. **运行分析**：`npm run dev` → 打开页面 → **运行分析**（可选打开 **安全飞地**，需已 `build:wasm`）。
 2. **查看证明**：点击 **查看证明**，记录 `input_hash` / `output_hash` / `code_measurement`。
 3. **独立复核**：
 

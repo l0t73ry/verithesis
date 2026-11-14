@@ -14,6 +14,13 @@ npm run dev
 1. Import repo root `verithesis` (framework: Next.js, **Root Directory**: `web-app`).
 2. Set `VERITHESIS_CODE_MEASUREMENT` = Git commit SHA on deploy.
 3. `NEXT_PUBLIC_GITHUB_URL` = public repo.
+4. **`GITHUB_TOKEN`**（强烈建议）：只读公开仓库即可，不需要任何 scope。Vercel 出口 IP 共享，匿名 GitHub API 很容易被限流；GitHub 开发活跃度因子拉取失败且无缓存时，请求会明确报错（不再静默当作 0）。
+5. **安全飞地（`tee: true`）在 Vercel 上的运行条件**：
+   - 仓库已内置 `enclave-worker/wasm/verithesis-wasi.wasm` 与 `web-app/public/verithesis-wasi.wasm`，`next.config.ts` 的 `outputFileTracingIncludes` 会把它们打进 `rerun` / `verify` / `capabilities` 函数；
+   - 用 Node 内置 `node:wasi` 执行，无需 wasmtime；结果 `provider` 为 `local-wasi`（逻辑飞地，无硬件证明）；
+   - 数据目录在 Vercel 上自动落到 `/tmp`，各实例互不共享（金库接口需要先在同一实例上运行分析）；
+   - 改过 `outlayer/verithesis-wasi/src/main.rs` 必须 `npm run build:wasm` 并同时提交两份 `.wasm`；可设 `VERITHESIS_EXPECTED_WASM_SHA256` 钉住版本；
+   - 部署后访问 `/api/thesis/capabilities`，`tee.wasm` 应为 `true`。
 
 ## OutLayer TEE (production)
 

@@ -70,7 +70,7 @@ curl -s http://localhost:5830/api/thesis/capabilities
 - `OUTLAYER_PAYMENT_KEY`（可选）
 - `NEXT_PUBLIC_OUTLAYER_ENABLED=true`（前端显示飞地开关）
 
-未配置时默认 **本地可信路径**（`provider: local-dev`，`quote.status: simulated`），仍具备 input/output 哈希绑定，适合开发与演示。
+未配置时默认 **本地可信路径**（`provider: local-dev`，`quote.status: simulated`；本机 WASM 闸门为 `provider: local-wasi`），仍具备 input/output 哈希绑定，适合开发与演示。
 
 本地 Mock coordinator：`npm run mock:outlayer`，详见 [attestation-runbook.md](./attestation-runbook.md)。
 

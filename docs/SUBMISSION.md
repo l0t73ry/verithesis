@@ -29,7 +29,7 @@ npm run build
 
 - [ ] `web-app/.env` 无真实密钥入库（仅用 `.env.example`）  
 - [ ] `VERITHESIS_CODE_MEASUREMENT` 在 Vercel 设为 commit SHA  
-- [ ] 证明弹窗 `provider` 与叙述一致（`local-dev` vs `outlayer-intel-tdx`）  
+- [ ] 证明弹窗 `provider` 与叙述一致（`local-dev` / `local-wasi` / `outlayer-intel-tdx`；quote 未验签前不要宣称 “TEE verified”）  
 - [ ] [`docs/VERIFY.md`](./VERIFY.md) 中的域名已换成线上 URL  
 
 ## 叙事要点
