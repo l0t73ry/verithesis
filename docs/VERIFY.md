@@ -13,7 +13,7 @@
 分享卡片二维码指向：
 
 ```text
-https://<你的域名>/?run=<output_hash>
+https://verithesis.vercel.app/?run=<output_hash>
 ```
 
 兼容旧链接 `?hash=<input_hash>`（返回该配置下最近一次归档）。

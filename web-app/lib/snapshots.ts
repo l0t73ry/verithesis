@@ -1,8 +1,17 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { SnapshotRecord } from '@verithesis/enclave-worker';
 
-const DATA_DIR = join(process.cwd(), '.data');
+function resolveDataDir(): string {
+  if (process.env.VERITHESIS_DATA_DIR) return process.env.VERITHESIS_DATA_DIR;
+  if (process.env.VERCEL || process.cwd().startsWith('/var/task')) {
+    return join(tmpdir(), 'verithesis-data');
+  }
+  return join(process.cwd(), '.data');
+}
+
+const DATA_DIR = resolveDataDir();
 const FILE = join(DATA_DIR, 'snapshots.json');
 
 function ensure() {

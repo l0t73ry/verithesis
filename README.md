@@ -2,6 +2,9 @@
 
 可验证链上投资论点平台（NEAR Hackathon · Investment Thesis）。**以 [PROJECT_SPEC.md](./PROJECT_SPEC.md) 为准。**
 
+- **在线 Demo**：[https://verithesis.vercel.app/](https://verithesis.vercel.app/)
+- **源代码**：[https://github.com/l0t73ry/verithesis](https://github.com/l0t73ry/verithesis)
+
 ## 结构
 
 | 目录 | 说明 |
@@ -52,7 +55,7 @@ curl -s -X POST http://localhost:5830/api/thesis/verify \
 | `GET /api/thesis/capabilities` | ✅ 飞地开关可用性 |
 | `npm run verify:wasm` | ✅ Node ↔ WASM 交叉校验 |
 | Paywall 真 0.1 NEAR | ⏸ 需你接钱包 |
-| Vercel / GitHub / 视频 | ⏸ 需你提交 |
+| Vercel / GitHub | ✅ [verithesis.vercel.app](https://verithesis.vercel.app/) · [l0t73ry/verithesis](https://github.com/l0t73ry/verithesis) |
 
 ## Deploy
 

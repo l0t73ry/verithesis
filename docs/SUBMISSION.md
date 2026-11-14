@@ -2,10 +2,10 @@
 
 ## 仓库与 Demo
 
-| 项 | 你填 |
+| 项 | 地址 / 说明 |
 |----|------|
-| GitHub 公开仓库 | `NEXT_PUBLIC_GITHUB_URL` |
-| 在线 Demo（Vercel 等） | |
+| GitHub 公开仓库 | [https://github.com/l0t73ry/verithesis](https://github.com/l0t73ry/verithesis) |
+| 在线 Demo（Vercel） | [https://verithesis.vercel.app/](https://verithesis.vercel.app/) |
 | OutLayer 项目 ID | `you.near/verithesis`（示例） |
 | X / 视频链接（60s） | |
 
