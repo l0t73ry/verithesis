@@ -1,0 +1,159 @@
+{
+  "meta": {
+    "title": "VeriThesis — 検証可能な投資リサーチ",
+    "description": "ライブデータで NEAR DeFi テーゼを再実行し、実行ごとに暗号学的証明を取得"
+  },
+  "lang": {
+    "label": "言語"
+  },
+  "dashboard": {
+    "tagline": "検証可能な投資リサーチ",
+    "subtitle": "ライブ市場データと封印戦略。各実行に改ざん検知可能な証明を付与。",
+    "verifiedBadge": "証明を表示",
+    "mode": "戦略",
+    "modePublic": "透明",
+    "modeSealed": "封印アルファ",
+    "timeframe": "期間",
+    "token": "トークン",
+    "smoothWindow": "平滑化",
+    "tvlWeight": "TVL 重み（残りは価格モメンタム）",
+    "sharpe": "Sharpe",
+    "maxDrawdown": "最大 DD",
+    "strategyReturn": "戦略リターン",
+    "buyHoldReturn": "B&H",
+    "strategyVsBh": "戦略リターン",
+    "factorLine": "因子: GitHub 7d={gh} · funding≈{funding}bps · whale≈{whale}M · w_tvl={w}%",
+    "vaultPreview": "TEE ボールト計画",
+    "rerun": "分析を実行",
+    "rerunLoading": "分析中…",
+    "signal": "シグナル",
+    "metricsR": "R / R²",
+    "hitRate": "命中率",
+    "snapshotsTitle": "実行履歴",
+    "snapshotOut": "出力",
+    "github": "ソースコード",
+    "requestFailed": "エラーが発生しました。もう一度お試しください。",
+    "resultsTitle": "インサイト",
+    "paramsTitle": "設定",
+    "tee": "セキュアエンクレーブ",
+    "teeHint": "OutLayer 未設定時はローカル WASI + wasmtime（build-wasm.sh）",
+    "teeUnavailable": "OutLayer またはローカル WASM がありません。build:wasm または OUTLAYER_* を設定してください。",
+    "teeOn": "今回の実行はエンクレーブ経路です（WASM または OutLayer）。"
+  },
+  "verify": {
+    "loaded": "リンクから検証済み実行を読み込みました",
+    "notFound": "このハッシュの実行は見つかりません",
+    "notFoundHint": "接頭辞 {hash}… が見つかりません。この環境で先に分析を実行するか、完全なハッシュを確認してください。",
+    "recheck": "再実行してハッシュを比較",
+    "outputMatch": "出力ハッシュはアーカイブと一致します。",
+    "outputMismatch": "出力ハッシュが異なります（ライブデータの更新の可能性）。"
+  },
+  "signal": {
+    "bullish": "強気",
+    "bearish": "弱気",
+    "neutral": "中立"
+  },
+  "chart": {
+    "title": "価格と TVL",
+    "days": "重複日数 {n}",
+    "price": "価格 (USD)",
+    "tvl": "NEAR TVL (百万 USD)"
+  },
+  "empty": {
+    "title": "まだ分析がありません",
+    "body": "期間とトークンを選び、分析を実行して最新データを取得し結果を封印します。",
+    "cta": "分析を実行",
+    "hintScroll": "上で設定を選び「分析を実行」を押すと、結果がここに表示されます。"
+  },
+  "attestation": {
+    "badge": "証明済み",
+    "title": "暗号学的証明",
+    "intro": "この実行は下記のコード・入力・出力ハッシュに結び付いています。第三者が独自に検証できます。",
+    "provider": "証明の由来",
+    "codeMeasurement": "コード測定",
+    "executionTimestamp": "実行時刻",
+    "inputHash": "入力ハッシュ",
+    "outputHash": "出力ハッシュ",
+    "tdxQuote": "TDX クォート (base64)",
+    "signatureChain": "署名チェーン",
+    "close": "閉じる",
+    "statusPass": "検証済み",
+    "statusPending": "保留",
+    "statusSimulated": "ローカル"
+  },
+  "paywall": {
+    "unlocked": "リアルタイムシグナルが有効です。",
+    "unlockedHint": "最新の相場で実行（デモではチェーン上の NEAR は課金しません）。",
+    "lagged": "プレビューは最大 24 時間遅れのデータです。リアルタイムはアンロックしてください。",
+    "demoNote": "ハッカソンデモ：アンロックは模擬レシートを付けて再実行します。0.1 NEAR の本番決済は別途ウォレット接続が必要です。",
+    "unlock": "リアルタイムを解放 · 0.1 NEAR"
+  },
+  "ai": {
+    "title": "リサーチアシスタント",
+    "placeholder": "例：14 日平滑化で NEAR TVL は価格をリードしますか？",
+    "parse": "記述を解析",
+    "apply": "左の設定に反映",
+    "appliedHint": "設定を更新しました。確認後「分析を実行」を押してください。",
+    "parsing": "解釈中…",
+    "parseFailed": "解釈できませんでした"
+  },
+  "conclusion": {
+    "headline": {
+      "bullish": "{token} のモメンタムは NEAR DeFi TVL と連動（リード/ラグ）{sealed}",
+      "bearish": "{token} は NEAR DeFi TVL と乖離{sealed}",
+      "neutral": "{token} vs NEAR DeFi TVL：ウィンドウ内に明確なエッジなし{sealed}"
+    },
+    "summary": "Pearson r={r}、R²={r2}；同方向ヒット率 {hit}%。{disclaimer}",
+    "summaryShort": "Sharpe {sharpe} · 最大 DD {mdd}% · 戦略 {strat}% vs B&H {bh}%。{disclaimer}",
+    "sealedNote": "（Sealed Alpha — 重みは TEE 内のみ）",
+    "disclaimer": "投資助言ではありません。"
+  },
+  "results": {
+    "expandMetrics": "相関・命中率の詳細",
+    "trustLine": "入力 {hash}… · {provider} · quote {quote} — 証明を開く",
+    "factorDemo": "funding / whale：デモ合成"
+  },
+  "vault": {
+    "drawerTitle": "TEE ボールト実行計画",
+    "drawerIntro": "審査用プレビューです。この UI からチェーン上の swap は送りません。",
+    "status": "状態",
+    "reason": "理由",
+    "network": "ネットワーク",
+    "dex": "DEX",
+    "swap": "スワップ",
+    "policy": "ポリシー"
+  },
+  "snapshots": {
+    "empty": "分析後、過去の実行がここに表示されます。選択して出力ハッシュを確認できます。",
+    "restoreHint": "このサーバーのアーカイブからチャートと結論を復元しました。",
+    "compareTitle": "スナップショット比較",
+    "compareHint": "最大 3 件：指標テーブル優先。入力が異なるときだけ正規化価格を重ねます。",
+    "comparePriceOnly": "各実行の価格（USD）。日付は重なる範囲で整列。",
+    "compareNormalized": "正規化価格（初日 = 100）",
+    "compareNormalizedCaption": "各実行の初日価格を 100 にそろえ、形を比較します。",
+    "compareSameInput": "入力ハッシュが同じため価格線は重なります。グラフは非表示。テーブルで出力ハッシュを確認してください。",
+    "compareSameInputDrift": "入力は同じですが出力ハッシュが異なります。相場またはコードの更新の可能性があります。",
+    "compareSameInputHint": "選択済み実行と入力が同じです。比較は指標テーブルを中心にします。",
+    "colTime": "保存時刻",
+    "colConfig": "設定",
+    "colHash": "入力ハッシュ",
+    "compareMax": "同時に比較できるのは 3 件までです。",
+    "compareToggle": "比較"
+  },
+  "share": {
+    "button": "シェアカードを保存",
+    "copyLink": "検証リンクをコピー",
+    "copied": "コピーしました",
+    "downloaded": "画像を保存しました",
+    "failed": "画像の生成に失敗しました",
+    "cardTag": "VeriThesis · 検証済みリサーチ",
+    "cardVerify": "QR でこの実行を検証",
+    "receipt": "レシート JSON を保存",
+    "receiptSaved": "レシートを保存しました"
+  },
+  "parseApi": {
+    "parsed": "更新：{params}。準備ができたら分析を実行してください。",
+    "empty": "7d/30d/90d、NEAR または REF、平滑化、透明/封印モードなどを含めてください。",
+    "queryRequired": "質問を入力してください"
+  }
+}

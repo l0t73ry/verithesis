@@ -1,0 +1,209 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+@layer base {
+  body {
+    @apply min-h-screen bg-ink font-sans text-slate-100 antialiased;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 230, 184, 0.1), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 0%, rgba(99, 102, 241, 0.06), transparent);
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    @apply bg-accent/25 text-white;
+  }
+}
+
+/* VeriThesis page shell (Ant Design layout helpers) */
+.vt-shell {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 12px 12px 24px;
+}
+
+@media (min-width: 640px) {
+  .vt-shell {
+    padding: 16px 16px 28px;
+  }
+}
+
+.vt-shell .ant-layout-content,
+.vt-shell .ant-layout-footer {
+  padding-inline: 0;
+}
+
+.vt-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 4px 0 8px;
+}
+
+.vt-page-header__brand {
+  flex: 1 1 220px;
+}
+
+.vt-page-header__actions {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+@media (max-width: 575px) {
+  .vt-page-header__actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+.vt-stretch-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.vt-stretch-col > .ant-card {
+  flex: 1;
+  width: 100%;
+}
+
+.vt-params-grid {
+  display: grid;
+  gap: 12px;
+  align-items: end;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 576px) {
+  .vt-params-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 992px) {
+  .vt-params-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.vt-params-grid .vt-params-span {
+  grid-column: 1 / -1;
+}
+
+.vt-params-grid .ant-form-item {
+  margin-bottom: 0;
+}
+
+.vt-params-grid .ant-form-item-label > label {
+  height: auto;
+}
+
+.vt-params-actions {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #334155;
+}
+
+.vt-params-tee {
+  min-width: 0;
+  flex: 1 1 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vt-params-tee-hint {
+  font-size: 12px;
+  line-height: 1.45;
+  display: block;
+  padding-left: 2px;
+}
+
+@media (max-width: 575px) {
+  .vt-params-actions__row {
+    flex-direction: column-reverse;
+    align-items: stretch !important;
+  }
+
+  .vt-params-actions__row .ant-btn-primary {
+    width: 100%;
+  }
+}
+
+.vt-signal-hero {
+  transition: border-color 0.2s ease;
+}
+
+.vt-metrics-collapse.ant-collapse-ghost > .ant-collapse-item > .ant-collapse-header {
+  padding: 0 0 4px;
+  align-items: center;
+}
+
+.vt-metrics-collapse .ant-collapse-content-box {
+  padding: 4px 0 0 !important;
+}
+
+.vt-result-actions {
+  padding-top: 12px;
+  border-top: 1px solid #334155;
+}
+
+.vt-results-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 112px;
+  padding: 16px 12px;
+}
+
+.vt-results-loading .ant-spin {
+  line-height: 1;
+}
+
+.vt-results-busy {
+  position: relative;
+}
+
+.vt-results-busy > .ant-flex {
+  transition: opacity 0.15s ease;
+}
+
+.vt-results-busy[aria-busy='true'] > .ant-flex {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.vt-results-busy-spin {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.vt-stats-row .ant-col {
+  display: flex;
+}
+
+.vt-stats-row .ant-statistic {
+  width: 100%;
+}
+
+.vt-stats-row .ant-statistic-content {
+  line-height: 1.2;
+}
+
+.vt-snap-scroller {
+  margin: 0 -4px;
+  padding: 4px 4px 8px;
+}
+
+.vt-snap-scroller .ant-card-body {
+  padding: 10px 12px !important;
+}

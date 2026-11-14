@@ -1,0 +1,159 @@
+{
+  "meta": {
+    "title": "VeriThesis — Verifiable investment research",
+    "description": "Re-run NEAR DeFi theses on live data with cryptographic attestation on every run"
+  },
+  "lang": {
+    "label": "Language"
+  },
+  "dashboard": {
+    "tagline": "Verifiable investment research",
+    "subtitle": "Live market data, optional sealed strategies, and a tamper-evident proof on every run.",
+    "verifiedBadge": "View attestation",
+    "mode": "Strategy",
+    "modePublic": "Transparent",
+    "modeSealed": "Sealed alpha",
+    "timeframe": "Timeframe",
+    "token": "Token",
+    "smoothWindow": "Smoothing window",
+    "tvlWeight": "TVL weight (fork model · rest = price momentum)",
+    "sharpe": "Sharpe",
+    "maxDrawdown": "Max drawdown",
+    "strategyReturn": "Strategy return",
+    "buyHoldReturn": "Buy & hold",
+    "strategyVsBh": "Strategy return",
+    "factorLine": "Factors: GitHub 7d={gh} · funding≈{funding}bps · whale≈{whale}M (demo) · w_tvl={w}%",
+    "vaultPreview": "Preview TEE vault plan",
+    "rerun": "Run analysis",
+    "rerunLoading": "Analyzing…",
+    "signal": "Signal",
+    "metricsR": "R / R²",
+    "hitRate": "Hit rate",
+    "snapshotsTitle": "Run history",
+    "snapshotOut": "Output",
+    "github": "Source code",
+    "requestFailed": "Something went wrong. Please try again.",
+    "resultsTitle": "Insights",
+    "paramsTitle": "Configuration",
+    "tee": "Secure enclave",
+    "teeHint": "Uses OutLayer when configured; otherwise local WASI + wasmtime",
+    "teeUnavailable": "No OutLayer env or local WASM. Run npm run build:wasm or set OUTLAYER_*.",
+    "teeOn": "This run uses the enclave path (WASM gate or OutLayer)."
+  },
+  "verify": {
+    "loaded": "Loaded a verified run from link",
+    "notFound": "No archived run for this hash",
+    "notFoundHint": "Hash prefix {hash}… was not found. Run analysis on this deployment first, or check the full hash.",
+    "recheck": "Re-run & compare hashes",
+    "outputMatch": "Output hash matches the archived run.",
+    "outputMismatch": "Output hash differs (live data may have moved)."
+  },
+  "signal": {
+    "bullish": "Bullish",
+    "bearish": "Bearish",
+    "neutral": "Neutral"
+  },
+  "chart": {
+    "title": "Price vs. TVL",
+    "days": "{n} overlapping trading days",
+    "price": "Price (USD)",
+    "tvl": "NEAR TVL (M USD)"
+  },
+  "empty": {
+    "title": "No analysis yet",
+    "body": "Pick a timeframe and token, then run analysis to pull live market data and seal the result.",
+    "cta": "Run analysis",
+    "hintScroll": "Configure parameters above, then click Run analysis. Results will appear here."
+  },
+  "attestation": {
+    "badge": "Attested",
+    "title": "Cryptographic attestation",
+    "intro": "This run is bound to the exact code, inputs, and outputs below. Anyone can verify the binding independently.",
+    "provider": "Attestation source",
+    "codeMeasurement": "Code measurement",
+    "executionTimestamp": "Execution time",
+    "inputHash": "Input hash",
+    "outputHash": "Output hash",
+    "tdxQuote": "TDX quote (base64)",
+    "signatureChain": "Signature chain",
+    "close": "Close",
+    "statusPass": "Verified",
+    "statusPending": "Pending",
+    "statusSimulated": "Local"
+  },
+  "paywall": {
+    "unlocked": "Real-time signal is active.",
+    "unlockedHint": "This run uses live quotes (demo does not charge on-chain NEAR).",
+    "lagged": "Preview data is up to 24 hours behind live markets. Unlock for real-time signals.",
+    "demoNote": "Hackathon demo: unlock stores a mock payment receipt and re-runs analysis. Wire 0.1 NEAR on-chain separately.",
+    "unlock": "Unlock real-time · 0.1 NEAR"
+  },
+  "ai": {
+    "title": "Research assistant",
+    "placeholder": "e.g. Try 14-day smoothing — does NEAR TVL still lead price?",
+    "parse": "Parse request",
+    "apply": "Apply to left panel",
+    "appliedHint": "Configuration updated — review the form, then click Run analysis.",
+    "parsing": "Understanding…",
+    "parseFailed": "Could not parse that request"
+  },
+  "conclusion": {
+    "headline": {
+      "bullish": "{token} momentum aligns with NEAR DeFi TVL (lead/lag co-movement){sealed}",
+      "bearish": "{token} diverges from NEAR DeFi TVL{sealed}",
+      "neutral": "{token} vs NEAR DeFi TVL: no strong edge in window{sealed}"
+    },
+    "summary": "Pearson r={r}, R²={r2}; co-move hit {hit}%. {disclaimer}",
+    "summaryShort": "Sharpe {sharpe} · max drawdown {mdd}% · strategy {strat}% vs buy & hold {bh}%. {disclaimer}",
+    "sealedNote": " (Sealed Alpha — weights in TEE only)",
+    "disclaimer": "Not financial advice."
+  },
+  "results": {
+    "expandMetrics": "More correlation & hit-rate metrics",
+    "trustLine": "input {hash}… · {provider} · quote {quote} — open attestation",
+    "factorDemo": "funding / whale: demo synthetic"
+  },
+  "vault": {
+    "drawerTitle": "TEE vault execution plan",
+    "drawerIntro": "Read-only preview for hackathon judges. No on-chain swap is sent from this UI.",
+    "status": "Status",
+    "reason": "Reason",
+    "network": "Network",
+    "dex": "DEX",
+    "swap": "Swap",
+    "policy": "Policy"
+  },
+  "snapshots": {
+    "empty": "Your past runs will appear here. Select one to review its output hash and headline.",
+    "restoreHint": "Restored chart and conclusion from archive on this server.",
+    "compareTitle": "Snapshot compare",
+    "compareHint": "Select up to 3 runs: metrics table first; normalized price overlay when inputs differ.",
+    "comparePriceOnly": "Price (USD) per run; dates aligned where data overlaps.",
+    "compareNormalized": "Normalized price (day 1 = 100)",
+    "compareNormalizedCaption": "Each run’s first price is indexed to 100 for shape comparison.",
+    "compareSameInput": "Same input hash — price lines would overlap, chart hidden. Use the table for output hashes or drift.",
+    "compareSameInputDrift": "Same input but different output hashes — markets or code may have changed; trust attestation hashes.",
+    "compareSameInputHint": "This run shares input with a selected run; comparison focuses on the metrics table.",
+    "colTime": "Saved",
+    "colConfig": "Config",
+    "colHash": "Input hash",
+    "compareMax": "You can compare up to 3 runs at once.",
+    "compareToggle": "Compare"
+  },
+  "share": {
+    "button": "Download share card",
+    "copyLink": "Copy verify link",
+    "copied": "Link copied",
+    "downloaded": "Share image saved",
+    "failed": "Could not generate image. Try again.",
+    "cardTag": "VeriThesis · Verified research",
+    "cardVerify": "Scan to verify this run",
+    "receipt": "Download receipt JSON",
+    "receiptSaved": "Receipt saved"
+  },
+  "parseApi": {
+    "parsed": "Updated: {params}. Run analysis when ready.",
+    "empty": "Try mentioning 7d/30d/90d, NEAR or REF, smoothing days, or transparent vs sealed mode.",
+    "queryRequired": "Please enter a question"
+  }
+}

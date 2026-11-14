@@ -1,0 +1,26 @@
+{
+  "schema": "verithesis-run-receipt@v1",
+  "execution_timestamp": "2026-01-01T12:00:00.000Z",
+  "input_hash": "<sha256 hex — thesis config>",
+  "output_hash": "<sha256 hex — conclusion + series>",
+  "code_measurement": "<git sha or wasm sha256>",
+  "provider": "local-dev",
+  "quote_status": "simulated",
+  "input": {
+    "timeframe": "30d",
+    "target_token": "NEAR",
+    "smoothing_window": 1,
+    "tvl_weight": 0.5,
+    "strategy_mode": "public",
+    "realtime_unlocked": false
+  },
+  "conclusion": {
+    "signal": "bullish",
+    "sharpe_ratio": 0,
+    "strategy_return_pct": 0,
+    "buy_hold_return_pct": 0,
+    "headline": ""
+  },
+  "snapshot_id": "2026-01-01T12:00:00.000Z-45b4e0a4",
+  "verify_path": "/?run=<output_hash>"
+}

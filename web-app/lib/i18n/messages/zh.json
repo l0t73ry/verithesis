@@ -1,0 +1,159 @@
+{
+  "meta": {
+    "title": "VeriThesis — 可验证投资研究",
+    "description": "基于实时行情重跑 NEAR DeFi 论点，每次分析产出可独立校验的密码学证明"
+  },
+  "lang": {
+    "label": "语言"
+  },
+  "dashboard": {
+    "tagline": "可验证投资研究",
+    "subtitle": "实时行情、可选密封策略，每次运行附带可核验的完整性证明。",
+    "verifiedBadge": "查看证明",
+    "mode": "策略",
+    "modePublic": "透明算法",
+    "modeSealed": "密封策略",
+    "timeframe": "时间跨度",
+    "token": "标的",
+    "smoothWindow": "平滑窗口",
+    "tvlWeight": "TVL 权重（Fork 模型 · 其余为价格动量）",
+    "sharpe": "夏普",
+    "maxDrawdown": "最大回撤",
+    "strategyReturn": "策略收益",
+    "buyHoldReturn": "买入持有",
+    "strategyVsBh": "策略收益",
+    "factorLine": "因子：GitHub 7d={gh} 次 · funding≈{funding}bps · 巨鲸≈{whale}M（demo）· w_tvl={w}%",
+    "vaultPreview": "预览 TEE 金库执行计划",
+    "rerun": "运行分析",
+    "rerunLoading": "分析中…",
+    "signal": "信号",
+    "metricsR": "R / R²",
+    "hitRate": "同向命中率",
+    "snapshotsTitle": "历史运行",
+    "snapshotOut": "输出",
+    "github": "源代码",
+    "requestFailed": "请求失败，请稍后重试",
+    "resultsTitle": "结论",
+    "paramsTitle": "分析配置",
+    "tee": "安全飞地",
+    "teeHint": "优先连 OutLayer；未配置则用本机 WASM（需 build-wasm.sh + wasmtime）",
+    "teeUnavailable": "未检测到 OutLayer 或本机 WASM。运行 npm run build:wasm 或配置 OUTLAYER_*。",
+    "teeOn": "本次将走飞地路径（WASM 闸门或 OutLayer）。"
+  },
+  "verify": {
+    "loaded": "已从链接载入已存档运行",
+    "notFound": "未找到该哈希对应的运行",
+    "notFoundHint": "未找到前缀 {hash}… 的记录。请在本环境先运行分析，或核对完整哈希。",
+    "recheck": "重新运行并比对哈希",
+    "outputMatch": "输出哈希与存档一致。",
+    "outputMismatch": "输出哈希不一致（行情可能已更新）。"
+  },
+  "signal": {
+    "bullish": "看多",
+    "bearish": "看空",
+    "neutral": "中性"
+  },
+  "chart": {
+    "title": "价格与 TVL",
+    "days": "{n} 个重叠交易日",
+    "price": "价格 (USD)",
+    "tvl": "NEAR TVL (百万 USD)"
+  },
+  "empty": {
+    "title": "还没有分析记录",
+    "body": "选择时间与标的后运行分析，将拉取最新行情并封存本次结果。",
+    "cta": "运行分析",
+    "hintScroll": "在上方完成配置后点击「运行分析」，结论将显示在本区域。"
+  },
+  "attestation": {
+    "badge": "已证明",
+    "title": "密码学证明",
+    "intro": "本次运行与下方代码度量、输入与输出哈希一一绑定，第三方可独立复核。",
+    "provider": "证明来源",
+    "codeMeasurement": "代码度量",
+    "executionTimestamp": "执行时间",
+    "inputHash": "输入哈希",
+    "outputHash": "输出哈希",
+    "tdxQuote": "TDX 报价 (base64)",
+    "signatureChain": "签名链",
+    "close": "关闭",
+    "statusPass": "已验证",
+    "statusPending": "待完成",
+    "statusSimulated": "本地"
+  },
+  "paywall": {
+    "unlocked": "已开启实时信号。",
+    "unlockedHint": "本次运行使用最新行情（演示环境不扣链上 NEAR）。",
+    "lagged": "预览数据较实盘最多延迟 24 小时。解锁后可看实时信号。",
+    "demoNote": "黑客松演示：点击解锁会写入模拟付款凭证并重新运行分析，链上 0.1 NEAR 需你自行接钱包。",
+    "unlock": "解锁实时信号 · 0.1 NEAR"
+  },
+  "ai": {
+    "title": "研究助手",
+    "placeholder": "例：改用 14 天平滑，NEAR TVL 是否仍领先价格？",
+    "parse": "解析描述",
+    "apply": "应用到左侧配置",
+    "appliedHint": "已写入分析配置，请确认后点击「运行分析」。",
+    "parsing": "理解中…",
+    "parseFailed": "未能理解该描述"
+  },
+  "conclusion": {
+    "headline": {
+      "bullish": "{token} 价格动量与 NEAR DeFi TVL 同向联动（领先/滞后）{sealed}",
+      "bearish": "{token} 与 NEAR DeFi TVL 走势背离{sealed}",
+      "neutral": "{token} 相对 NEAR DeFi TVL：窗口内无明显优势{sealed}"
+    },
+    "summary": "Pearson r={r}，R²={r2}；同向命中率 {hit}%。{disclaimer}",
+    "summaryShort": "夏普 {sharpe} · 最大回撤 {mdd}% · 策略 {strat}% vs 买入持有 {bh}%。{disclaimer}",
+    "sealedNote": "（密封 Alpha — 权重仅在 TEE 内）",
+    "disclaimer": "不构成投资建议。"
+  },
+  "results": {
+    "expandMetrics": "展开相关性与命中率",
+    "trustLine": "输入 {hash}… · {provider} · 报价 {quote} — 查看证明",
+    "factorDemo": "funding / 巨鲸：演示合成数据"
+  },
+  "vault": {
+    "drawerTitle": "TEE 金库执行计划",
+    "drawerIntro": "仅供评委预览，本界面不会发起链上 swap。",
+    "status": "状态",
+    "reason": "原因",
+    "network": "网络",
+    "dex": "DEX",
+    "swap": "兑换",
+    "policy": "限额策略"
+  },
+  "snapshots": {
+    "empty": "运行分析后，历史记录会出现在这里。点选可查看摘要与输出哈希。",
+    "restoreHint": "已从本机归档还原该次图表与结论。",
+    "compareTitle": "快照对比",
+    "compareHint": "勾选最多 3 条历史运行：先看指标表，再在输入不同时看重叠日的归一化价格曲线。",
+    "comparePriceOnly": "各次运行的价格（USD）；日期按重叠区间对齐。",
+    "compareNormalized": "归一化价格（首日 = 100）",
+    "compareNormalizedCaption": "各次运行首日价格设为 100，便于比较走势形态。",
+    "compareSameInput": "所选运行输入哈希相同，价格曲线会重合，已隐藏叠图。请用下表比对输出哈希或刷新后指标是否漂移。",
+    "compareSameInputDrift": "输入相同但输出哈希不一致——行情或代码版本可能已更新，请以证明哈希为准。",
+    "compareSameInputHint": "该次与已选运行的输入相同，叠图意义不大，将侧重指标表。",
+    "colTime": "保存时间",
+    "colConfig": "配置",
+    "colHash": "输入哈希",
+    "compareMax": "最多同时对比 3 次运行。",
+    "compareToggle": "对比"
+  },
+  "share": {
+    "button": "下载分享卡片",
+    "copyLink": "复制验真链接",
+    "copied": "已复制",
+    "downloaded": "分享图已保存",
+    "failed": "生成图片失败，请稍后重试",
+    "cardTag": "VeriThesis · 可验证研究",
+    "cardVerify": "扫码在本站验真此次运行",
+    "receipt": "下载收据 JSON",
+    "receiptSaved": "收据已保存"
+  },
+  "parseApi": {
+    "parsed": "已更新：{params}。确认后运行分析即可。",
+    "empty": "请尝试写明 7d/30d/90d、NEAR 或 REF、平滑天数，或透明/密封模式。",
+    "queryRequired": "请输入问题"
+  }
+}

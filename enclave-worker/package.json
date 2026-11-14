@@ -1,0 +1,15 @@
+{
+  "name": "@verithesis/enclave-worker",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./receipt": "./src/receipt.ts"
+  },
+  "scripts": {
+    "test": "npx --yes tsx --test src/__tests__/hash.test.ts src/__tests__/backtest.test.ts src/__tests__/analyzer.golden.test.ts src/__tests__/nlp.test.ts src/__tests__/receipt.test.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0"
+  }
+}

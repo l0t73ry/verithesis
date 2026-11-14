@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OutLayer coordinator → VeriThesis",
+  "description": "POST {OUTLAYER_API_URL}/call/{OUTLAYER_PROJECT_ID}",
+  "request": {
+    "type": "object",
+    "required": ["input"],
+    "properties": {
+      "input": {
+        "type": "object",
+        "required": ["timeframe", "target_token"],
+        "properties": {
+          "timeframe": { "enum": ["7d", "30d", "90d"] },
+          "target_token": { "enum": ["NEAR", "REF"] },
+          "smoothing_window": { "type": "number" },
+          "strategy_mode": { "enum": ["public", "sealed"] },
+          "realtime_unlocked": { "type": "boolean" },
+          "payment_receipt": { "type": ["string", "null"] },
+          "code_measurement": { "type": "string" }
+        }
+      }
+    }
+  },
+  "response": {
+    "type": "object",
+    "required": ["output"],
+    "properties": {
+      "output": { "description": "Full ThesisResult JSON" },
+      "result": { "description": "Alias of output" },
+      "code_measurement": { "type": "string" },
+      "attestation": {
+        "type": "object",
+        "properties": {
+          "tdx_quote_b64": { "type": "string" },
+          "quote_b64": { "type": "string" },
+          "code_measurement": { "type": "string" }
+        }
+      },
+      "quote": {
+        "type": "object",
+        "properties": {
+          "tdx_quote_b64": { "type": "string" },
+          "status": { "type": "string" }
+        }
+      }
+    }
+  }
+}
