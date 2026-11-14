@@ -6,7 +6,7 @@ Verifiable on-chain investment thesis platform built for the **NEAR Hackathon (I
 
 - **Live Demo**: [https://verithesis.vercel.app/](https://verithesis.vercel.app/)
 - **Source Code**: [https://github.com/l0t73ry/verithesis](https://github.com/l0t73ry/verithesis)
-- **Demo Video (X)**: [https://x.com/BlackburnR22177/status/2121521362321944923](https://x.com/BlackburnR22177/status/2121521362321944923)
+- **Demo Video (X)**: [https://x.com/BlackburnR22177/status/2121530948986773939](https://x.com/BlackburnR22177/status/2121530948986773939)
 - **Research Thesis & Falsification Report**: [THESIS.md](./THESIS.md)
 - **License**: [MIT](./LICENSE)
 
@@ -72,7 +72,7 @@ See [`docs/VERIFY.md`](./docs/VERIFY.md) for details.
 | `GET /api/thesis/capabilities` | ✅ Enclave availability probe |
 | `npm run verify:wasm` | ✅ Node ↔ WASM golden fixture cross-check |
 | Pay-per-call real-time unlock (0.1 NEAR) | ✅ Demo receipt flow (on-chain wallet wiring optional) |
-| Live Demo / GitHub / Video | ✅ [verithesis.vercel.app](https://verithesis.vercel.app/) · [l0t73ry/verithesis](https://github.com/l0t73ry/verithesis) · [X Video](https://x.com/BlackburnR22177/status/2121521362321944923) |
+| Live Demo / GitHub / Video | ✅ [verithesis.vercel.app](https://verithesis.vercel.app/) · [l0t73ry/verithesis](https://github.com/l0t73ry/verithesis) · [X Video](https://x.com/BlackburnR22177/status/2121530948986773939) |
 
 ## Deployment
 

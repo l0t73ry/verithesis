@@ -7,7 +7,7 @@
 | GitHub 公开仓库 | [https://github.com/l0t73ry/verithesis](https://github.com/l0t73ry/verithesis) |
 | 在线 Demo（Vercel） | [https://verithesis.vercel.app/](https://verithesis.vercel.app/) |
 | OutLayer 项目 ID | `you.near/verithesis`（示例） |
-| X / 视频链接（60s） | [https://x.com/BlackburnR22177/status/2121521362321944923](https://x.com/BlackburnR22177/status/2121521362321944923) |
+| X / 视频链接（60s） | [https://x.com/BlackburnR22177/status/2121530948986773939](https://x.com/BlackburnR22177/status/2121530948986773939) |
 
 ## 评委 60 秒脚本（建议）
 
