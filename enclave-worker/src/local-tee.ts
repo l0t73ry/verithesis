@@ -43,6 +43,7 @@ function repoWasmPath(): string {
     join(cwd, '..', BUNDLED_WASM_REL),
     join(cwd, 'wasm', 'verithesis-wasi.wasm'),
     join(cwd, 'public', 'verithesis-wasi.wasm'),
+    join(cwd, 'web-app', 'public', 'verithesis-wasi.wasm'),
   ];
   try {
     const here = dirname(fileURLToPath(import.meta.url));
