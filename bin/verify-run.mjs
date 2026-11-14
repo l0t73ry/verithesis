@@ -5,12 +5,14 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const ref = process.argv[2];
+const rawRef = process.argv[2];
+// Same gate as web-app/lib/run-ref.ts: 8–64 lowercase hex only (the ref is used to build file paths).
+const ref = /^[0-9a-f]{8,64}$/i.test(rawRef ?? '') ? rawRef.toLowerCase() : undefined;
 const recheck = process.argv.includes('--recheck');
 const base = process.env.VERITHESIS_URL ?? 'http://localhost:5830';
 
 if (!ref) {
-  console.error('Usage: node bin/verify-run.mjs <output_hash|input_hash> [--recheck]');
+  console.error('Usage: node bin/verify-run.mjs <output_hash|input_hash (8–64 hex)> [--recheck]');
   process.exit(1);
 }
 
@@ -20,18 +22,18 @@ const indexPath = join(dataDir, 'runs-index.json');
 const legacyPath = join(dataDir, 'runs-archive.json');
 
 function findLocal(ref) {
-  const h = ref.toLowerCase();
+  const h = ref;
   if (existsSync(join(runsDir, `${h}.json`))) {
     return JSON.parse(readFileSync(join(runsDir, `${h}.json`), 'utf8'));
   }
   if (existsSync(indexPath)) {
     const index = JSON.parse(readFileSync(indexPath, 'utf8'));
-    const out = index.find((e) => e.output_hash.startsWith(h) || h.startsWith(e.output_hash));
+    const out = index.find((e) => e.output_hash.startsWith(h));
     if (out) {
       const p = join(runsDir, `${out.output_hash}.json`);
       if (existsSync(p)) return JSON.parse(readFileSync(p, 'utf8'));
     }
-    const inputs = index.filter((e) => e.input_hash.startsWith(h) || h.startsWith(e.input_hash));
+    const inputs = index.filter((e) => e.input_hash.startsWith(h));
     inputs.sort((a, b) => b.saved_at.localeCompare(a.saved_at));
     if (inputs[0]) {
       const p = join(runsDir, `${inputs[0].output_hash}.json`);
@@ -40,12 +42,12 @@ function findLocal(ref) {
   }
   if (existsSync(legacyPath)) {
     const all = JSON.parse(readFileSync(legacyPath, 'utf8'));
-    const key = Object.keys(all).find((k) => k === h || k.startsWith(h) || h.startsWith(k));
+    const key = Object.keys(all).find((k) => k.startsWith(h));
     if (key) return all[key];
   }
   if (existsSync(runsDir)) {
     for (const name of readdirSync(runsDir)) {
-      if (name.startsWith(h) || h.startsWith(name.replace('.json', ''))) {
+      if (/^[0-9a-f]{64}\.json$/.test(name) && name.startsWith(h)) {
         return JSON.parse(readFileSync(join(runsDir, name), 'utf8'));
       }
     }

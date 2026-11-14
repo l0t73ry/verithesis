@@ -7,7 +7,8 @@
     "dev:clean": "rm -rf .next && next dev -p 5830",
     "build": "next build",
     "start": "next start -p 5830",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "tsx --test lib/__tests__/*.test.ts"
   },
   "dependencies": {
     "@ant-design/icons": "^6.3.4",

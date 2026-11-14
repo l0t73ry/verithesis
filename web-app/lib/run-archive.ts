@@ -1,24 +1,10 @@
-import {
-  readFileSync,
-  writeFileSync,
-  mkdirSync,
-  existsSync,
-  unlinkSync,
-  renameSync,
-  readdirSync,
-} from 'node:fs';
-import { tmpdir } from 'node:os';
+import { existsSync, mkdirSync, readdirSync, renameSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { buildRunReceipt } from '@verithesis/enclave-worker';
 import type { ThesisResult } from '@verithesis/enclave-worker';
-
-function resolveDataDir(): string {
-  if (process.env.VERITHESIS_DATA_DIR) return process.env.VERITHESIS_DATA_DIR;
-  if (process.env.VERCEL || process.cwd().startsWith('/var/task')) {
-    return join(tmpdir(), 'verithesis-data');
-  }
-  return join(process.cwd(), '.data');
-}
+import { resolveDataDir } from './data-dir';
+import { readJsonSafe, writeFileAtomic } from './fs-json';
+import { isFullHash, normalizeRunRef, refMatches } from './run-ref';
 
 const DATA_DIR = resolveDataDir();
 const RUNS_DIR = join(DATA_DIR, 'runs');
@@ -33,13 +19,49 @@ type RunIndexEntry = {
 };
 
 const MAX_RUNS = 50;
+const ARCHIVE_FILE_RE = /^[0-9a-f]{64}\.json$/;
 
 let legacyMigrated = false;
 
 function ensureDirs() {
-  if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
-  if (!existsSync(RUNS_DIR)) mkdirSync(RUNS_DIR, { recursive: true });
-  if (!existsSync(RECEIPTS_DIR)) mkdirSync(RECEIPTS_DIR, { recursive: true });
+  for (const dir of [DATA_DIR, RUNS_DIR, RECEIPTS_DIR]) {
+    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+  }
+}
+
+// File names come from hashes. Every path builder asserts a full 64-hex hash, so even a caller
+// that forgets to validate cannot escape RUNS_DIR / RECEIPTS_DIR.
+function runPath(outputHash: string) {
+  if (!isFullHash(outputHash)) throw new Error('Invalid output_hash');
+  return join(RUNS_DIR, `${outputHash}.json`);
+}
+
+function receiptPath(outputHash: string) {
+  if (!isFullHash(outputHash)) throw new Error('Invalid output_hash');
+  return join(RECEIPTS_DIR, `${outputHash}.json`);
+}
+
+function loadIndexRaw(): RunIndexEntry[] {
+  const rows = readJsonSafe<unknown>(INDEX_FILE, []);
+  if (!Array.isArray(rows)) return [];
+  return (rows as RunIndexEntry[]).filter(
+    (e) => e && isFullHash(e.output_hash) && typeof e.input_hash === 'string' && typeof e.saved_at === 'string',
+  );
+}
+
+function loadIndex(): RunIndexEntry[] {
+  ensureDirs();
+  ensureLegacyMigrated();
+  return loadIndexRaw();
+}
+
+function saveIndex(entries: RunIndexEntry[]) {
+  ensureDirs();
+  writeFileAtomic(INDEX_FILE, JSON.stringify(entries, null, 2));
+}
+
+function readRunFile(outputHash: string): ThesisResult | null {
+  return readJsonSafe<ThesisResult | null>(runPath(outputHash), null);
 }
 
 function ensureLegacyMigrated() {
@@ -48,45 +70,16 @@ function ensureLegacyMigrated() {
   migrateLegacyArchive();
 }
 
-function loadIndex(): RunIndexEntry[] {
-  ensureDirs();
-  ensureLegacyMigrated();
-  if (!existsSync(INDEX_FILE)) {
-    writeFileSync(INDEX_FILE, '[]', 'utf8');
-    return [];
-  }
-  return JSON.parse(readFileSync(INDEX_FILE, 'utf8')) as RunIndexEntry[];
-}
-
-function saveIndex(entries: RunIndexEntry[]) {
-  ensureDirs();
-  writeFileSync(INDEX_FILE, JSON.stringify(entries, null, 2), 'utf8');
-}
-
-function runPath(outputHash: string) {
-  return join(RUNS_DIR, `${outputHash}.json`);
-}
-
-function receiptPath(outputHash: string) {
-  return join(RECEIPTS_DIR, `${outputHash}.json`);
-}
-
-function readRunFile(outputHash: string): ThesisResult | null {
-  const path = runPath(outputHash);
-  if (!existsSync(path)) return null;
-  return JSON.parse(readFileSync(path, 'utf8')) as ThesisResult;
-}
-
 function migrateLegacyArchive() {
   if (!existsSync(LEGACY_FILE)) return;
   ensureDirs();
-  const all = JSON.parse(readFileSync(LEGACY_FILE, 'utf8')) as Record<string, ThesisResult>;
-  const index: RunIndexEntry[] = loadIndexWithoutMigrate();
+  const all = readJsonSafe<Record<string, ThesisResult>>(LEGACY_FILE, {});
+  const index = loadIndexRaw();
   const seen = new Set(index.map((e) => e.output_hash));
 
   for (const result of Object.values(all)) {
     const out = result?.attestation?.output_hash;
-    if (!out || seen.has(out)) continue;
+    if (!isFullHash(out) || !isFullHash(result.attestation.input_hash) || seen.has(out)) continue;
     writeRunArtifacts(result);
     index.unshift({
       output_hash: out,
@@ -102,83 +95,74 @@ function migrateLegacyArchive() {
   renameSync(LEGACY_FILE, `${LEGACY_FILE}.migrated`);
 }
 
-function loadIndexWithoutMigrate(): RunIndexEntry[] {
-  if (!existsSync(INDEX_FILE)) return [];
-  return JSON.parse(readFileSync(INDEX_FILE, 'utf8')) as RunIndexEntry[];
-}
-
 function writeRunArtifacts(result: ThesisResult) {
   const out = result.attestation.output_hash;
-  writeFileSync(runPath(out), JSON.stringify(result), 'utf8');
-  writeFileSync(receiptPath(out), JSON.stringify(buildRunReceipt(result), null, 2), 'utf8');
+  writeFileAtomic(runPath(out), JSON.stringify(result));
+  writeFileAtomic(receiptPath(out), JSON.stringify(buildRunReceipt(result), null, 2));
 }
 
-function pruneRunFiles(keep: RunIndexEntry[]) {
-  const keepSet = new Set(keep.map((e) => e.output_hash));
-  if (!existsSync(RUNS_DIR)) return;
-  for (const name of readdirSync(RUNS_DIR)) {
-    const hash = name.replace(/\.json$/, '');
-    if (!keepSet.has(hash)) {
-      try {
-        unlinkSync(join(RUNS_DIR, name));
-        unlinkSync(receiptPath(hash));
-      } catch {
-        /* ignore */
-      }
+function pruneDir(dir: string, keepSet: Set<string>) {
+  if (!existsSync(dir)) return;
+  for (const name of readdirSync(dir)) {
+    // Only ever touch files we created; leave stray/temp files alone.
+    if (!ARCHIVE_FILE_RE.test(name) || keepSet.has(name.slice(0, -'.json'.length))) continue;
+    try {
+      unlinkSync(join(dir, name));
+    } catch (e) {
+      console.error(`[verithesis] prune failed for ${name}:`, e);
     }
   }
 }
 
+function pruneRunFiles(keep: RunIndexEntry[]) {
+  const keepSet = new Set(keep.map((e) => e.output_hash));
+  pruneDir(RUNS_DIR, keepSet);
+  pruneDir(RECEIPTS_DIR, keepSet);
+}
+
+/** Persist a run. Throws if the result's hashes are not 64-char hex (they become file names). */
 export function archiveRun(result: ThesisResult): void {
+  const { output_hash, input_hash, execution_timestamp } = result.attestation;
+  if (!isFullHash(output_hash) || !isFullHash(input_hash)) {
+    throw new Error('Refusing to archive run with malformed attestation hashes');
+  }
   ensureDirs();
   ensureLegacyMigrated();
 
-  const entry: RunIndexEntry = {
-    output_hash: result.attestation.output_hash,
-    input_hash: result.attestation.input_hash,
-    saved_at: result.attestation.execution_timestamp,
-  };
-
   writeRunArtifacts(result);
 
-  const index = loadIndex().filter((e) => e.output_hash !== entry.output_hash);
+  const entry: RunIndexEntry = { output_hash, input_hash, saved_at: execution_timestamp };
+  const index = loadIndexRaw().filter((e) => e.output_hash !== output_hash);
   const next = [entry, ...index].slice(0, MAX_RUNS);
   saveIndex(next);
   pruneRunFiles(next);
 }
 
 export function findRunReceipt(outputHash: string) {
-  const path = receiptPath(outputHash.trim());
-  if (!existsSync(path)) return null;
-  return JSON.parse(readFileSync(path, 'utf8'));
+  if (!isFullHash(outputHash)) return null;
+  return readJsonSafe<unknown>(receiptPath(outputHash), null);
 }
 
-function normalizeRef(ref: string) {
-  return ref.trim().toLowerCase();
-}
-
-function matchesPrefix(haystack: string, needle: string) {
-  return haystack === needle || haystack.startsWith(needle) || needle.startsWith(haystack);
-}
-
-/** Resolve by output_hash (preferred) or input_hash (latest run for that config). */
+/** Resolve by output_hash (preferred) or input_hash (latest run for that config). Prefixes ≥ 8 hex ok. */
 export function findRunByHash(ref: string): ThesisResult | null {
-  const h = normalizeRef(ref);
+  const h = normalizeRunRef(ref);
   if (!h) return null;
   ensureDirs();
   ensureLegacyMigrated();
 
-  const direct = readRunFile(h);
-  if (direct) return direct;
+  if (isFullHash(h)) {
+    const direct = readRunFile(h);
+    if (direct) return direct;
+  }
 
   const index = loadIndex();
-  const outHit = index.find((e) => matchesPrefix(e.output_hash, h));
+  const outHit = index.find((e) => refMatches(e.output_hash, h));
   if (outHit) {
     const run = readRunFile(outHit.output_hash);
     if (run) return run;
   }
 
-  const inputMatches = index.filter((e) => matchesPrefix(e.input_hash, h));
+  const inputMatches = index.filter((e) => refMatches(e.input_hash, h));
   if (inputMatches.length === 0) return null;
   inputMatches.sort((a, b) => b.saved_at.localeCompare(a.saved_at));
   return readRunFile(inputMatches[0]!.output_hash);

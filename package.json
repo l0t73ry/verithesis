@@ -10,11 +10,11 @@
     "dev:clean": "npm run dev:clean -w @verithesis/web-app",
     "build": "npm run build -w @verithesis/web-app",
     "lint": "npm run lint -w @verithesis/web-app",
-    "test": "npm run test -w @verithesis/enclave-worker",
+    "test": "npm run test -w @verithesis/enclave-worker && npm run test -w @verithesis/web-app",
     "verify": "node bin/verify-run.mjs",
     "build:wasm": "bash outlayer/build-wasm.sh",
-    "verify:wasm": "npm run build:wasm && npx --yes tsx bin/verify-wasm.mjs",
-    "mock:outlayer": "npx --yes tsx bin/mock-outlayer-coordinator.ts",
+    "verify:wasm": "npm run build:wasm && tsx bin/verify-wasm.mjs",
+    "mock:outlayer": "tsx bin/mock-outlayer-coordinator.ts",
     "verify:p0": "npm run verify:wasm"
   }
 }

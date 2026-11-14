@@ -1,4 +1,5 @@
 import type { SnapshotRecord, ThesisResult } from '@verithesis/enclave-worker';
+import { normalizeRunRef, refMatches } from '@/lib/run-ref';
 
 const DB_NAME = 'verithesis-runs';
 const DB_VERSION = 1;
@@ -102,20 +103,15 @@ export async function listLocalSnapshots(): Promise<SnapshotRecord[]> {
   }
 }
 
-function matchHash(stored: string, ref: string) {
-  const a = stored.toLowerCase();
-  const b = ref.trim().toLowerCase();
-  return a === b || a.startsWith(b) || b.startsWith(a);
-}
-
 export async function findLocalRun(ref: string): Promise<ThesisResult | null> {
-  if (typeof indexedDB === 'undefined' || !ref.trim()) return null;
+  const needle = normalizeRunRef(ref);
+  if (typeof indexedDB === 'undefined' || !needle) return null;
   const db = await openDb();
   try {
     const rows = await listStoredRows(db);
-    const out = rows.find((r) => matchHash(r.output_hash, ref));
+    const out = rows.find((r) => refMatches(r.output_hash, needle));
     if (out) return out.result;
-    const byInput = rows.filter((r) => matchHash(r.input_hash, ref));
+    const byInput = rows.filter((r) => refMatches(r.input_hash, needle));
     if (byInput.length === 0) return null;
     byInput.sort((a, b) => b.saved_at.localeCompare(a.saved_at));
     return byInput[0]!.result;
