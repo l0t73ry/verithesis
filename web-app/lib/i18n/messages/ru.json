@@ -85,6 +85,18 @@
     "statusPending": "В ожидании",
     "statusSimulated": "Локально"
   },
+  "auth": {
+    "login": "Вход Ghostore",
+    "logout": "Выйти",
+    "loginTitle": "Аккаунт Ghostore",
+    "loginHint": "Запуски сохраняются в workspace Ghostore.",
+    "loginSubmit": "Войти",
+    "username": "Имя пользователя",
+    "password": "Пароль",
+    "usernameRequired": "Укажите имя",
+    "passwordRequired": "Укажите пароль",
+    "quota": "Hub сегодня {remaining}/{limit}"
+  },
   "paywall": {
     "unlocked": "Сигнал в реальном времени активен.",
     "unlockedHint": "Запуск с актуальными котировками (в демо NEAR в сети не списывается).",

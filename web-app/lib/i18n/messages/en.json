@@ -85,6 +85,18 @@
     "statusPending": "Pending",
     "statusSimulated": "Local"
   },
+  "auth": {
+    "login": "Ghostore sign in",
+    "logout": "Sign out",
+    "loginTitle": "Ghostore account",
+    "loginHint": "Signed-in runs archive to your Ghostore workspace and stay queryable by hash.",
+    "loginSubmit": "Sign in",
+    "username": "Username",
+    "password": "Password",
+    "usernameRequired": "Username is required",
+    "passwordRequired": "Password is required",
+    "quota": "Hub archive today {remaining}/{limit}"
+  },
   "paywall": {
     "unlocked": "Real-time signal is active.",
     "unlockedHint": "This run uses live quotes (demo does not charge on-chain NEAR).",

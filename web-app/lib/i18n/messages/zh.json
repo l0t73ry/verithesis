@@ -85,6 +85,18 @@
     "statusPending": "待完成",
     "statusSimulated": "本地"
   },
+  "auth": {
+    "login": "Ghostore 登录",
+    "logout": "退出",
+    "loginTitle": "使用 Ghostore 账号",
+    "loginHint": "登录后每次运行会归档到 Ghostore 工作区，可跨设备通过哈希查阅。",
+    "loginSubmit": "登录",
+    "username": "用户名",
+    "password": "密码",
+    "usernameRequired": "请输入用户名",
+    "passwordRequired": "请输入密码",
+    "quota": "今日 Hub 归档 {remaining}/{limit}"
+  },
   "paywall": {
     "unlocked": "已开启实时信号。",
     "unlockedHint": "本次运行使用最新行情（演示环境不扣链上 NEAR）。",

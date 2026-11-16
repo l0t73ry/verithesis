@@ -36,6 +36,8 @@ import { ThesisCompareChart, thesisCompareColors, type CompareRun } from './Thes
 import { VerifyHashBanner } from './VerifyHashBanner';
 import { useI18n } from '@/lib/i18n/context';
 import { mergeSnapshotLists, listLocalSnapshots, putLocalRun } from '@/lib/run-indexeddb';
+import { loadGhostoreSession } from '@/lib/ghostore-auth';
+import { useGhostoreAuth } from '@/lib/ghostore-auth-context';
 import { fetchArchivedRun } from '@/lib/resolve-run';
 
 const { Content, Footer } = Layout;
@@ -49,6 +51,7 @@ const cardStyles = {
 export function Dashboard() {
   const { t, messages } = useI18n();
   const { message } = App.useApp();
+  const { refreshQuota } = useGhostoreAuth();
   const [timeframe, setTimeframe] = useState<Timeframe>('30d');
   const [targetToken, setTargetToken] = useState<TargetToken>('NEAR');
   const [smoothing, setSmoothing] = useState(1);
@@ -174,9 +177,12 @@ export function Dashboard() {
         payment_receipt: overrides?.realtime_unlocked || realtimeUnlocked ? 'demo-near-0.1' : null,
         tee: runInTee,
       };
+      const authHeaders: Record<string, string> = { 'content-type': 'application/json' };
+      const gs = loadGhostoreSession();
+      if (gs?.accessToken) authHeaders.Authorization = `Bearer ${gs.accessToken}`;
       const res = await fetch('/api/thesis/rerun', {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify(body),
       });
       const data = await res.json();
@@ -185,6 +191,7 @@ export function Dashboard() {
       setResult(next);
       await putLocalRun(next);
       await loadSnapshots();
+      await refreshQuota();
       requestAnimationFrame(() => {
         resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
@@ -193,7 +200,7 @@ export function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }, [timeframe, targetToken, smoothing, tvlWeightPct, strategyMode, realtimeUnlocked, runInTee, loadSnapshots, t]);
+  }, [timeframe, targetToken, smoothing, tvlWeightPct, strategyMode, realtimeUnlocked, runInTee, loadSnapshots, refreshQuota, t]);
 
   const applyAi = (partial: Partial<ThesisInput>) => {
     if (partial.timeframe) setTimeframe(partial.timeframe);

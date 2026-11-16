@@ -1,4 +1,5 @@
 import { hashThesisInput, hashOutput, runThesisAnalysis } from '@verithesis/enclave-worker';
+import { fetchPublicRunFromHub } from '@/lib/ghostore-hub';
 import { findRunByHash } from '@/lib/run-archive';
 import { normalizeRunRef } from '@/lib/run-ref';
 import { envLimit, rateLimit } from '@/lib/rate-limit';
@@ -24,7 +25,11 @@ export async function GET(req: Request) {
     const ref = normalizeRunRef(raw);
     if (!ref) return Response.json({ error: INVALID_REF }, { status: 400 });
 
-    const stored = findRunByHash(ref);
+    let stored = await fetchPublicRunFromHub(ref);
+    let source: 'hub' | 'local' = stored ? 'hub' : 'local';
+    if (!stored) {
+      stored = findRunByHash(ref);
+    }
     if (!stored) {
       return Response.json({ found: false, ref }, { status: 404 });
     }
@@ -36,6 +41,7 @@ export async function GET(req: Request) {
       saved_at: stored.attestation.execution_timestamp,
       result: stored,
       lookup: run ? 'output_hash' : 'input_hash',
+      archive_source: source,
     });
   } catch (e) {
     console.error('[verithesis] verify GET failed:', e);

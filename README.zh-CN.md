@@ -60,6 +60,7 @@ curl -s -X POST http://localhost:5830/api/thesis/verify \
 | `tee: true` → OutLayer 或本地 WASM | ✅ WASM 内分析与哈希对齐；`npm run mock:outlayer` 可模拟 quote |
 | `GET /api/thesis/capabilities` | ✅ 飞地开关可用性 |
 | `npm run verify:wasm` | ✅ Node ↔ WASM 交叉校验 |
+| Ghostore 登录 + Hub 归档 | ✅ 见 [docs/GHOSTORE-INTEGRATION.md](./docs/GHOSTORE-INTEGRATION.md) |
 | Paywall 真 0.1 NEAR | ⏸ 需你接钱包 |
 | Vercel / GitHub / 视频 | ✅ [verithesis.vercel.app](https://verithesis.vercel.app/) · [l0t73ry/verithesis](https://github.com/l0t73ry/verithesis) · [X Video](https://x.com/BlackburnR22177/status/2121530948986773939) |
 

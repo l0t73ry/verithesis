@@ -1,5 +1,6 @@
 import { parseThesisInput, runThesisAnalysis } from '@verithesis/enclave-worker';
 import type { ThesisInput } from '@verithesis/enclave-worker';
+import { archiveRunToHub } from '@/lib/ghostore-hub';
 import { archiveRun } from '@/lib/run-archive';
 import { isPaymentReceiptValid } from '@/lib/payment';
 import { envLimit, rateLimit } from '@/lib/rate-limit';
@@ -13,6 +14,13 @@ export const maxDuration = 30;
 const RERUN_LIMIT_PER_MIN = envLimit('VERITHESIS_RATE_LIMIT_RERUN_PER_MIN', 20);
 // TEE runs spend the server's paid OutLayer key / WASM CPU — keep them on a tighter budget.
 const TEE_LIMIT_PER_MIN = envLimit('VERITHESIS_RATE_LIMIT_TEE_PER_MIN', 6);
+
+function bearerToken(req: Request): string | null {
+  const h = req.headers.get('authorization');
+  if (!h?.toLowerCase().startsWith('bearer ')) return null;
+  const t = h.slice(7).trim();
+  return t || null;
+}
 
 function parseBody(body: unknown): ThesisInput & { tee: boolean } {
   const params = parseThesisInput(body);
@@ -45,6 +53,13 @@ export async function POST(req: Request) {
       process.env.VERITHESIS_CODE_MEASUREMENT ?? process.env.VERCEL_GIT_COMMIT_SHA ?? undefined;
     const result = await runThesisAnalysis({ ...input, code_measurement }, { tee });
     archiveRun(result);
+    const hubToken = bearerToken(req);
+    if (hubToken) {
+      const hub = await archiveRunToHub(result, hubToken, 'public');
+      if (!hub.ok) {
+        console.warn('[verithesis] hub archive failed:', hub.error);
+      }
+    }
     if (result.snapshot) appendSnapshot(result.snapshot);
     return Response.json(result);
   } catch (e) {

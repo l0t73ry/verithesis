@@ -85,6 +85,18 @@
     "statusPending": "保留",
     "statusSimulated": "ローカル"
   },
+  "auth": {
+    "login": "Ghostore ログイン",
+    "logout": "ログアウト",
+    "loginTitle": "Ghostore アカウント",
+    "loginHint": "ログイン後の実行は Ghostore ワークスペースに保存されます。",
+    "loginSubmit": "ログイン",
+    "username": "ユーザー名",
+    "password": "パスワード",
+    "usernameRequired": "ユーザー名を入力",
+    "passwordRequired": "パスワードを入力",
+    "quota": "Hub 本日 {remaining}/{limit}"
+  },
   "paywall": {
     "unlocked": "リアルタイムシグナルが有効です。",
     "unlockedHint": "最新の相場で実行（デモではチェーン上の NEAR は課金しません）。",

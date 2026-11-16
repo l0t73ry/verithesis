@@ -1,13 +1,18 @@
 'use client';
 
-import { SafetyCertificateOutlined } from '@ant-design/icons';
+import { useState } from 'react';
+import { LoginOutlined, LogoutOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
 import { Button, Flex, Space, Tag, Typography } from 'antd';
+import { GhostoreLoginModal } from './GhostoreLoginModal';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { useGhostoreAuth } from '@/lib/ghostore-auth-context';
 import { useI18n } from '@/lib/i18n/context';
 import { vt } from '@/lib/verithesis-visual-tokens';
 
 export function DashboardHeader({ hasResult, onOpenAttestation }: { hasResult: boolean; onOpenAttestation: () => void }) {
   const { t } = useI18n();
+  const { session, quota, logout } = useGhostoreAuth();
+  const [loginOpen, setLoginOpen] = useState(false);
 
   return (
     <header className="vt-page-header">
@@ -49,12 +54,30 @@ export function DashboardHeader({ hasResult, onOpenAttestation }: { hasResult: b
       </Flex>
       <Space className="vt-page-header__actions" wrap size={8} align="center">
         <LanguageSwitcher />
+        {session ? (
+          <>
+            <Tag color="blue">{session.username}</Tag>
+            {quota ? (
+              <Tag>
+                {t('auth.quota', { remaining: String(quota.remaining), limit: String(quota.runs_limit) })}
+              </Tag>
+            ) : null}
+            <Button size="middle" icon={<LogoutOutlined />} onClick={logout}>
+              {t('auth.logout')}
+            </Button>
+          </>
+        ) : (
+          <Button size="middle" icon={<LoginOutlined />} onClick={() => setLoginOpen(true)}>
+            {t('auth.login')}
+          </Button>
+        )}
         {hasResult ? (
           <Button type="primary" size="middle" ghost icon={<SafetyCertificateOutlined />} onClick={onOpenAttestation}>
             {t('dashboard.verifiedBadge')}
           </Button>
         ) : null}
       </Space>
+      <GhostoreLoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
     </header>
   );
 }
