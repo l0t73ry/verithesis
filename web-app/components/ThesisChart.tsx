@@ -19,8 +19,11 @@ export function ThesisChart({ series }: { series: SeriesPoint[] }) {
   return (
     <div>
       <Typography.Text strong>{t('chart.title')}</Typography.Text>
-      <Typography.Text type="secondary" style={{ display: 'block', fontSize: 12, marginBottom: 8 }}>
+      <Typography.Text type="secondary" style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>
         {t('chart.days', { n: String(series.length) })}
+      </Typography.Text>
+      <Typography.Text type="secondary" style={{ display: 'block', fontSize: 11, marginBottom: 8, lineHeight: 1.45 }}>
+        {t('chart.axesNote')}
       </Typography.Text>
       <LineChartInner series={series} height={THESIS_PLOT_HEIGHT} />
     </div>

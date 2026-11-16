@@ -2,6 +2,7 @@ import {
   parseThesisInput,
   runThesisAnalysis,
   runThesisAnalysisFromSnapshot,
+  type HubDataSnapshot,
 } from '@verithesis/enclave-worker';
 import type { ThesisInput } from '@verithesis/enclave-worker';
 import { archiveRunToHub, fetchLatestHubSnapshot } from '@/lib/ghostore-hub';
@@ -67,6 +68,7 @@ export async function POST(req: Request) {
     const baseInput: ThesisInput = { ...input, code_measurement };
 
     let result;
+    let hubSnap: HubDataSnapshot | null = null;
     if (snapshotOnly()) {
       const snap = await fetchLatestHubSnapshot();
       if (!snap) {
@@ -79,7 +81,7 @@ export async function POST(req: Request) {
         typeof snap.fetched_at === 'string'
           ? snap.fetched_at
           : new Date(snap.fetched_at as unknown as string).toISOString();
-      const hubSnap = { ...snap, fetched_at: fetchedAt };
+      hubSnap = { ...snap, fetched_at: fetchedAt };
       result = await runThesisAnalysisFromSnapshot(
         { ...baseInput, data_snapshot_id: snap.id },
         hubSnap,
@@ -95,6 +97,9 @@ export async function POST(req: Request) {
       if (!hub.ok) console.warn('[verithesis] hub archive failed:', hub.error);
     }
     if (result.snapshot) appendSnapshot(result.snapshot);
+    if (hubSnap) {
+      result.hub_snapshot = { id: hubSnap.id, fetched_at: hubSnap.fetched_at, status: hubSnap.status };
+    }
     return Response.json(result);
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Unknown error';

@@ -22,6 +22,8 @@
     "strategyReturn": "戦略リターン",
     "buyHoldReturn": "B&H",
     "strategyVsBh": "戦略リターン",
+    "strategySimReturn": "ルール・バックテスト（模擬）",
+    "buyHoldSim": "買い持ち模擬 {pct}%",
     "factorLine": "因子: GitHub 7d={gh} · funding≈{funding}bps · whale≈{whale}M · w_tvl={w}%",
     "vaultPreview": "TEE ボールト計画",
     "rerun": "分析を実行",
@@ -61,8 +63,27 @@
   "chart": {
     "title": "価格と TVL",
     "days": "重複日数 {n}",
+    "axesNote": "左：価格、右：NEAR DeFi TVL（別スケール）。下の回測は固定ルールの模擬であり実損益ではありません。",
     "price": "価格 (USD)",
     "tvl": "NEAR TVL (百万 USD)"
+  },
+  "product": {
+    "scopeTitle": "このページの目的",
+    "scopeShort": "シグナルとリターンは模擬分析であり、投資助言・実取引ではありません。",
+    "scopeAnalysis": "Ghostore Hub スナップショット + 固定アルゴで検証可能な結論。",
+    "scopeSignal": "シグナルはラベル規則であり、期間騰落や注文ではありません。",
+    "scopeBacktest": "リターン%はルール回測と買い持ちの仮定シミュレーションです。",
+    "scopeNotAdvice": "利益保証なし。取引所実行なし。",
+    "hubData": "市場データ：Hub スナップショット #{id} · {at}",
+    "signalExplainIntro": "ラベル根拠：composite r={r}、直近3日価格モメンタム {mom}",
+    "triggerBullComposite": "強気：composite r &gt; 0.25",
+    "triggerBullMom": "強気：3日モメンタム &gt; 0",
+    "triggerBearComposite": "弱気：composite r &lt; -0.15",
+    "triggerBearMom": "弱気：3日モメンタム合計 &lt; -5%",
+    "triggerNeutral": "中立：閾値未達",
+    "downgradeGh": "（参考）GitHub 7d&lt;12 で強気→中立",
+    "downgradeFunding": "（参考）funding demo で強気→中立",
+    "downgradeWhale": "（参考）whale demo で強気→中立"
   },
   "empty": {
     "title": "まだ分析がありません",

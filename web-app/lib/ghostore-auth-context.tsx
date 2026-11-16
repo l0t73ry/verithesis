@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { GhostoreQuota } from '@/lib/ghostore-hub';
 import {
   type GhostoreSession,
@@ -10,17 +10,17 @@ import {
   refreshGhostoreSession,
 } from '@/lib/ghostore-auth';
 
-async function fetchQuotaClient(token: string): Promise<GhostoreQuota | null> {
+async function fetchQuotaClient(token: string): Promise<{ quota: GhostoreQuota | null; status: number }> {
   try {
     const res = await fetch('/api/ghostore/quota', {
       headers: { Authorization: `Bearer ${token}` },
       cache: 'no-store',
     });
-    if (!res.ok) return null;
+    if (!res.ok) return { quota: null, status: res.status };
     const body = (await res.json()) as { data?: GhostoreQuota };
-    return body.data ?? null;
+    return { quota: body.data ?? null, status: res.status };
   } catch {
-    return null;
+    return { quota: null, status: 0 };
   }
 }
 
@@ -36,32 +36,51 @@ type Ctx = {
 const GhostoreAuthContext = createContext<Ctx | null>(null);
 
 export function GhostoreAuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<GhostoreSession | null>(null);
+  const [session, setSession] = useState<GhostoreSession | null>(() =>
+    typeof window === 'undefined' ? null : loadGhostoreSession(),
+  );
   const [quota, setQuota] = useState<GhostoreQuota | null>(null);
   const [loggingIn, setLoggingIn] = useState(false);
-
-  useEffect(() => {
-    setSession(loadGhostoreSession());
-  }, []);
+  const refreshMutex = useRef<Promise<void> | null>(null);
 
   const refreshQuota = useCallback(async () => {
-    const s = loadGhostoreSession();
-    if (!s) {
-      setQuota(null);
+    if (refreshMutex.current) {
+      await refreshMutex.current;
       return;
     }
-    let active = s;
-    try {
-      active = await refreshGhostoreSession(s);
+
+    const job = (async () => {
+      const s = loadGhostoreSession();
+      if (!s) {
+        setQuota(null);
+        return;
+      }
+      let active = s;
+      const first = await fetchQuotaClient(active.accessToken);
+      if (first.status === 401) {
+        try {
+          active = await refreshGhostoreSession(active);
+          setSession(active);
+        } catch {
+          logoutGhostore();
+          setSession(null);
+          setQuota(null);
+          return;
+        }
+        const retry = await fetchQuotaClient(active.accessToken);
+        setQuota(retry.quota);
+        return;
+      }
+      setQuota(first.quota);
       setSession(active);
-    } catch {
-      logoutGhostore();
-      setSession(null);
-      setQuota(null);
-      return;
+    })();
+
+    refreshMutex.current = job;
+    try {
+      await job;
+    } finally {
+      refreshMutex.current = null;
     }
-    const q = await fetchQuotaClient(active.accessToken);
-    setQuota(q);
   }, []);
 
   useEffect(() => {

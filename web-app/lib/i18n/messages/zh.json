@@ -22,6 +22,8 @@
     "strategyReturn": "策略收益",
     "buyHoldReturn": "买入持有",
     "strategyVsBh": "策略收益",
+    "strategySimReturn": "规则回测（模拟）",
+    "buyHoldSim": "买入持有模拟 {pct}%",
     "factorLine": "因子：GitHub 7d={gh} 次 · funding≈{funding}bps · 巨鲸≈{whale}M（demo）· w_tvl={w}%",
     "vaultPreview": "预览 TEE 金库执行计划",
     "rerun": "运行分析",
@@ -61,8 +63,27 @@
   "chart": {
     "title": "价格与 TVL",
     "days": "{n} 个重叠交易日",
+    "axesNote": "左轴为标的日价，右轴为 NEAR DeFi TVL；两条线刻度独立。下方「规则回测」按固定价-TVL 规则模拟多空，不是真仓收益。",
     "price": "价格 (USD)",
     "tvl": "NEAR TVL (百万 USD)"
+  },
+  "product": {
+    "scopeTitle": "本页做什么",
+    "scopeShort": "信号与收益均为历史窗口内的规则计算与模拟回测，不构成投资建议，也不会替你下单。",
+    "scopeAnalysis": "分析：用 Ghostore Hub 市场快照 + 固定算法，产出可哈希复核的结论。",
+    "scopeSignal": "看多/看空/中性：标签规则，不等于窗口内涨跌，也不等于交易指令。",
+    "scopeBacktest": "收益%：「规则回测」与「买入持有」均为假设持有/假设规则下的模拟，不是你的账户盈亏。",
+    "scopeNotAdvice": "不能盈利：系统不接交易所；过去回测结果不保证未来表现。",
+    "hubData": "市场数据截至 Hub 快照 #{id} · {at}",
+    "signalExplainIntro": "本标签依据：composite r={r}，近 3 日价格动量合计 {mom}（与图表首尾涨跌可不一致）。",
+    "triggerBullComposite": "看多条件之一：composite r &gt; 0.25",
+    "triggerBullMom": "看多条件之一：近 3 日价格动量 &gt; 0",
+    "triggerBearComposite": "看空触发：composite r &lt; -0.15",
+    "triggerBearMom": "看空触发：近 3 日价格动量合计 &lt; -5%",
+    "triggerNeutral": "中性：未同时满足看多阈值，也未命中看空阈值",
+    "downgradeGh": "（说明）若满足看多阈值，GitHub 7d&lt;12 会把看多降为中性",
+    "downgradeFunding": "（说明）若满足看多阈值，高 funding demo 因子会把看多降为中性",
+    "downgradeWhale": "（说明）若满足看多阈值，鲸鱼 demo 因子会把看多降为中性"
   },
   "empty": {
     "title": "还没有分析记录",

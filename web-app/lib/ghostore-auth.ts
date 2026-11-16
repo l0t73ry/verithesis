@@ -8,10 +8,22 @@ export type GhostoreSession = {
 
 const STORAGE_KEY = 'verithesis.ghostore.session';
 
+function readStoredSession(): string | null {
+  const fromLocal = localStorage.getItem(STORAGE_KEY);
+  if (fromLocal) return fromLocal;
+  const legacy = sessionStorage.getItem(STORAGE_KEY);
+  if (legacy) {
+    localStorage.setItem(STORAGE_KEY, legacy);
+    sessionStorage.removeItem(STORAGE_KEY);
+    return legacy;
+  }
+  return null;
+}
+
 export function loadGhostoreSession(): GhostoreSession | null {
   if (typeof window === 'undefined') return null;
   try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
+    const raw = readStoredSession();
     if (!raw) return null;
     const o = JSON.parse(raw) as GhostoreSession;
     if (!o.accessToken || !o.refreshToken) return null;
@@ -24,10 +36,11 @@ export function loadGhostoreSession(): GhostoreSession | null {
 export function saveGhostoreSession(session: GhostoreSession | null): void {
   if (typeof window === 'undefined') return;
   if (!session) {
+    localStorage.removeItem(STORAGE_KEY);
     sessionStorage.removeItem(STORAGE_KEY);
     return;
   }
-  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
 }
 
 export async function loginGhostore(username: string, password: string): Promise<GhostoreSession> {

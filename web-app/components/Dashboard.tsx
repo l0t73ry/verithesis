@@ -34,6 +34,7 @@ import { SnapshotTimeline } from './SnapshotTimeline';
 import { ThesisChart } from './ThesisChart';
 import { ThesisCompareChart, thesisCompareColors, type CompareRun } from './ThesisCompareChart';
 import { VerifyHashBanner } from './VerifyHashBanner';
+import { ProductDisclosure } from './ProductDisclosure';
 import { useI18n } from '@/lib/i18n/context';
 import { mergeSnapshotLists, listLocalSnapshots, putLocalRun } from '@/lib/run-indexeddb';
 import { loadGhostoreSession } from '@/lib/ghostore-auth';
@@ -348,6 +349,7 @@ export function Dashboard() {
           </Col>
         </Row>
 
+        <ProductDisclosure />
         <div ref={resultsRef}>
         <Card
           title={t('dashboard.resultsTitle')}

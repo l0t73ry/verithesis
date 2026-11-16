@@ -64,7 +64,19 @@ cd ghostore/server && node scripts/migrate.js
 
 1. 合并并部署 **ghostore**（迁移 + 重启 API）
 2. 配置 **Vercel** 环境变量
-3. 部署 **verithesis**
+3. 部署 **verithesis** 分支 `product/v1-ghostore-account`（**勿用 `main` 作产品预览**）
+
+### Vercel 预览 / 产品环境变量
+
+| 变量 | 值 |
+|------|-----|
+| `GHOSTORE_API_URL` | `https://api.ghostore.pw` |
+| `VERITHESIS_REQUIRE_AUTH` | `1` |
+| `VERITHESIS_SNAPSHOT_ONLY` | `1` |
+| `VERITHESIS_CODE_MEASUREMENT` | 部署 commit SHA |
+
+VPS `ACCESS_IP_WHITELIST` 需放行 Vercel 出口 IP（服务端代理打 Hub）。  
+验收：未登录 rerun → 401；登录后结论区显示 **Hub 快照 #id · 时间**。
 
 ## 后续（未做）
 

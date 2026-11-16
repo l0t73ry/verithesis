@@ -6,7 +6,10 @@ import { Col, Collapse, Flex, Row, Space, Statistic, Tag, Typography } from 'ant
 import type { ThesisResult } from '@verithesis/enclave-worker';
 import { useI18n } from '@/lib/i18n/context';
 import { formatConclusionBrief } from '@/lib/conclusion-copy';
+import { formatRecentMomPct, signalExplainKeys } from '@/lib/signal-explainer';
 import { signalVisual } from '@/lib/signal-visual';
+import { HubDataProvenance } from '@/components/HubDataProvenance';
+import { ProductDisclosure } from '@/components/ProductDisclosure';
 import { vt } from '@/lib/verithesis-visual-tokens';
 
 const SIGNAL_ICON = {
@@ -29,9 +32,12 @@ export function ThesisResultSummary({
   const copy = formatConclusionBrief(messages.conclusion, c, result.input.target_token, result.strategy_mode);
   const att = result.attestation;
   const Icon = SIGNAL_ICON[meta.glyph];
+  const explainKeys = signalExplainKeys(c, result.series, result.strategy_mode);
+  const momPct = formatRecentMomPct(result.series);
 
   return (
     <Flex vertical gap={12}>
+      <HubDataProvenance result={result} />
       <MotionHero className="vt-signal-hero" style={{ borderColor: meta.border, background: meta.bg }}>
         <Flex align="center" justify="space-between" wrap gap={12}>
           <Space align="center" size={12}>
@@ -76,7 +82,7 @@ export function ThesisResultSummary({
             </Col>
             <Col span={8}>
               <Statistic
-                title={t('dashboard.strategyVsBh')}
+                title={t('dashboard.strategySimReturn')}
                 value={c.strategy_return_pct ?? 0}
                 suffix="%"
                 styles={{
@@ -88,7 +94,7 @@ export function ThesisResultSummary({
                 }}
               />
               <Typography.Text type="secondary" style={{ fontSize: 11 }}>
-                B&H {c.buy_hold_return_pct ?? 0}%
+                {t('dashboard.buyHoldSim', { pct: String(c.buy_hold_return_pct ?? 0) })}
               </Typography.Text>
             </Col>
           </Row>
@@ -100,7 +106,16 @@ export function ThesisResultSummary({
         <Typography.Paragraph type="secondary" style={{ marginBottom: 8, fontSize: 13, lineHeight: 1.5 }}>
           {copy.summary}
         </Typography.Paragraph>
-        <Space size={6} wrap>
+        <Typography.Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 8 }}>
+          {t('product.signalExplainIntro', { r: String(c.pearson_r), mom: momPct })}
+        </Typography.Text>
+        <ul style={{ margin: '0 0 10px', paddingLeft: 18, fontSize: 12, color: 'var(--ant-color-text-secondary)' }}>
+          {explainKeys.map((key) => (
+            <li key={key}>{t(`product.${key}` as 'product.triggerBearMom')}</li>
+          ))}
+        </ul>
+        <ProductDisclosure compact />
+        <Space size={6} wrap style={{ marginTop: 10 }}>
           {result.near_onchain ? (
             <>
               <Tag variant="filled" color="green">

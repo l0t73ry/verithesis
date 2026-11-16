@@ -22,6 +22,8 @@
     "strategyReturn": "Доход стратегии",
     "buyHoldReturn": "Buy & hold",
     "strategyVsBh": "Доход стратегии",
+    "strategySimReturn": "Бэктест правила (сим)",
+    "buyHoldSim": "Buy&hold сим {pct}%",
     "factorLine": "Факторы: GitHub 7d={gh} · funding≈{funding}bps · whale≈{whale}M · w_tvl={w}%",
     "vaultPreview": "План TEE vault",
     "rerun": "Запустить анализ",
@@ -61,8 +63,27 @@
   "chart": {
     "title": "Цена и TVL",
     "days": "{n} пересекающихся дней",
+    "axesNote": "Слева цена, справа NEAR DeFi TVL — разные шкалы. Бэктест — симуляция правила, не реальный PnL.",
     "price": "Цена (USD)",
     "tvl": "NEAR TVL (млн USD)"
+  },
+  "product": {
+    "scopeTitle": "Зачем эта страница",
+    "scopeShort": "Сигналы и доходность — симуляция, не совет и не торговля.",
+    "scopeAnalysis": "Снимок Ghostore Hub + фиксированный алгоритм, хешируемый вывод.",
+    "scopeSignal": "Сигналы — метки, не доходность окна и не ордера.",
+    "scopeBacktest": "Доход % — гипотетический бэктест vs buy&hold.",
+    "scopeNotAdvice": "Нет гарантии прибыли, нет исполнения на бирже.",
+    "hubData": "Данные: снимок Hub #{id} · {at}",
+    "signalExplainIntro": "Основание: composite r={r}, импульс цены 3 дня {mom}",
+    "triggerBullComposite": "Бычий: composite r &gt; 0.25",
+    "triggerBullMom": "Бычий: импульс 3 дня &gt; 0",
+    "triggerBearComposite": "Медвежий: composite r &lt; -0.15",
+    "triggerBearMom": "Медвежий: импульс 3 дня &lt; -5%",
+    "triggerNeutral": "Нейтрально: пороги не сработали",
+    "downgradeGh": "GitHub 7d&lt;12 может снизить бычий до нейтрального",
+    "downgradeFunding": "Funding demo может снизить бычий",
+    "downgradeWhale": "Whale demo может снизить бычий"
   },
   "empty": {
     "title": "Анализ ещё не запускался",

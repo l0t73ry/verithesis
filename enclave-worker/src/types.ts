@@ -100,4 +100,6 @@ export interface ThesisResult {
   near_onchain?: NearOnchainTelemetry;
   /** Strong bullish + env gate — UI may offer TEE vault plan */
   vault_eligible?: boolean;
+  /** Present when rerun used Ghostore market snapshot (UI only, not in output_hash). */
+  hub_snapshot?: { id: number; fetched_at: string; status?: string };
 }

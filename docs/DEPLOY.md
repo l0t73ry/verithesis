@@ -44,3 +44,9 @@ Vercel **仅需服务端** `GHOSTORE_API_URL=https://api.ghostore.pw`（不要 `
 | `VERITHESIS_DISABLE_HUB_ARCHIVE=1` | 可选：不归档 runs |
 
 市场数据由 Ghostore cron `ingest:snapshot` 写入；详见 `docs/GHOSTORE-INTEGRATION.md`。
+
+### 预览部署（产品分支）
+
+1. Vercel → Project → Git → Production Branch 保持 `main`（黑客松）；另开 **Preview** 跟踪 `product/v1-ghostore-account`。
+2. 对该分支配置上述 `GHOSTORE_*` / `VERITHESIS_*` 环境变量（仅 Preview 作用域亦可）。
+3. 推送分支后打开 Preview URL：登录 Ghostore → 运行分析 → 核对快照 id 与 `api.ghostore.pw/.../snapshot/latest` 一致。

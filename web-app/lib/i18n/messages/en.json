@@ -22,6 +22,8 @@
     "strategyReturn": "Strategy return",
     "buyHoldReturn": "Buy & hold",
     "strategyVsBh": "Strategy return",
+    "strategySimReturn": "Rule backtest (sim)",
+    "buyHoldSim": "Buy & hold sim {pct}%",
     "factorLine": "Factors: GitHub 7d={gh} · funding≈{funding}bps · whale≈{whale}M (demo) · w_tvl={w}%",
     "vaultPreview": "Preview TEE vault plan",
     "rerun": "Run analysis",
@@ -61,8 +63,27 @@
   "chart": {
     "title": "Price vs. TVL",
     "days": "{n} overlapping trading days",
+    "axesNote": "Left: token price; right: NEAR DeFi TVL (separate scales). Backtest uses a fixed rule — not live PnL.",
     "price": "Price (USD)",
     "tvl": "NEAR TVL (M USD)"
+  },
+  "product": {
+    "scopeTitle": "What this page does",
+    "scopeShort": "Signals and returns are simulated analytics — not advice, not live trading.",
+    "scopeAnalysis": "Analysis: Ghostore Hub snapshot + fixed algorithm with hashable output.",
+    "scopeSignal": "Signals are labels — not window return, not trade orders.",
+    "scopeBacktest": "Return % is hypothetical rule backtest vs buy-and-hold — not account PnL.",
+    "scopeNotAdvice": "No profit guarantee; no exchange execution.",
+    "hubData": "Market data through Hub snapshot #{id} · {at}",
+    "signalExplainIntro": "Label inputs: composite r={r}, 3-day price momentum {mom}.",
+    "triggerBullComposite": "Bullish: composite r &gt; 0.25",
+    "triggerBullMom": "Bullish: 3-day momentum &gt; 0",
+    "triggerBearComposite": "Bearish: composite r &lt; -0.15",
+    "triggerBearMom": "Bearish: 3-day momentum &lt; -5%",
+    "triggerNeutral": "Neutral: thresholds not met",
+    "downgradeGh": "(Note) GitHub 7d&lt;12 can downgrade bullish to neutral",
+    "downgradeFunding": "(Note) Funding demo can downgrade bullish to neutral",
+    "downgradeWhale": "(Note) Whale demo can downgrade bullish to neutral"
   },
   "empty": {
     "title": "No analysis yet",
