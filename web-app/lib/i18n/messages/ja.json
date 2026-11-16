@@ -60,6 +60,18 @@
     "bearish": "弱気",
     "neutral": "中立"
   },
+  "official": {
+    "loading": "公式シグナルを読み込み中…",
+    "unavailable": "公式シグナルを取得できません",
+    "title": "公式シグナル · {token} · {tf}",
+    "meta": "Hub スナップショット #{id} · {at} · r={r} · 3日モメンタム {mom}",
+    "hint": "固定設定（公開・ログイン不要）。ログイン後にパラメータを変えて再実行できます。",
+    "action": {
+      "hold": "提案：様子見",
+      "watch_long_bias": "提案：ロング偏りでウォッチ",
+      "defensive": "提案：防御的"
+    }
+  },
   "chart": {
     "title": "価格と TVL",
     "days": "重複日数 {n}",

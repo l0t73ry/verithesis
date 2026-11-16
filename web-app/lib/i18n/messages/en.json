@@ -60,6 +60,18 @@
     "bearish": "Bearish",
     "neutral": "Neutral"
   },
+  "official": {
+    "loading": "Loading official signal…",
+    "unavailable": "Official signal unavailable",
+    "title": "Official signal · {token} · {tf}",
+    "meta": "Hub snapshot #{id} · {at} · r={r} · 3d momentum {mom}",
+    "hint": "Fixed config (public, no login). Sign in to customize parameters and rerun.",
+    "action": {
+      "hold": "Suggested: hold",
+      "watch_long_bias": "Suggested: watch long bias",
+      "defensive": "Suggested: defensive"
+    }
+  },
   "chart": {
     "title": "Price vs. TVL",
     "days": "{n} overlapping trading days",

@@ -60,6 +60,18 @@
     "bearish": "看空",
     "neutral": "中性"
   },
+  "official": {
+    "loading": "正在加载官方信号…",
+    "unavailable": "官方信号暂不可用",
+    "title": "官方信号 · {token} · {tf}",
+    "meta": "Hub 快照 #{id} · {at} · r={r} · 3日动量 {mom}",
+    "hint": "固定配置（公开、无需登录）。登录后可改参数并运行自定义分析。",
+    "action": {
+      "hold": "建议：观望",
+      "watch_long_bias": "建议：偏多观察",
+      "defensive": "建议：偏防御"
+    }
+  },
   "chart": {
     "title": "价格与 TVL",
     "days": "{n} 个重叠交易日",

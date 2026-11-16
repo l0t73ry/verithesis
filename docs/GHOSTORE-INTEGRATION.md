@@ -11,6 +11,7 @@ VeriThesis 账号、运行归档与配额由 **Ghostore** 提供；**浏览器�
 | `GET /api/ghostore/quota` | `app/api/ghostore/quota` | `GET /api/verithesis/quota` |
 | `POST /api/thesis/rerun`（带 Bearer） | 服务端 `archiveRunToHub` | `POST /api/verithesis/runs` |
 | `GET /api/thesis/verify` | `fetchPublicRunFromHub` | `GET /api/verithesis/public/runs/:ref` |
+| `GET /api/thesis/signal/latest` | `fetchLatestHubSnapshot` + 固定配置 rerun | `GET /api/verithesis/snapshot/latest`（**公开，无需 Bearer**） |
 
 ## 分支
 
@@ -40,7 +41,7 @@ cd ghostore/server && node scripts/migrate.js
 
 1. **Cron** `verithesisIngest`（每 30min）→ `npx tsx verithesis/bin/ingest-snapshot-hub.mjs` → `POST /api/verithesis/snapshots/ingest`
 2. **rerun**（`VERITHESIS_SNAPSHOT_ONLY=1`）只读 `GET /api/verithesis/snapshot/latest`，**不**再打 CoinGecko/RPC
-3. **`VERITHESIS_REQUIRE_AUTH=1`**：`rerun` 必须 Ghostore 登录（Bearer）
+3. **`VERITHESIS_REQUIRE_AUTH=1`**：`rerun` 必须 Ghostore 登录（Bearer）；**`GET /api/thesis/signal/latest` 始终公开**
 4. 环境：`VERITHESIS_REPO_PATH`、`VERITHESIS_INGEST_KEY`（ghostore 与 ingest 脚本一致）
 
 ## 环境变量

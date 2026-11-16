@@ -35,6 +35,7 @@ import { ThesisChart } from './ThesisChart';
 import { ThesisCompareChart, thesisCompareColors, type CompareRun } from './ThesisCompareChart';
 import { VerifyHashBanner } from './VerifyHashBanner';
 import { ProductDisclosure } from './ProductDisclosure';
+import { OfficialSignalBanner } from './OfficialSignalBanner';
 import { useI18n } from '@/lib/i18n/context';
 import { mergeSnapshotLists, listLocalSnapshots, putLocalRun } from '@/lib/run-indexeddb';
 import { loadGhostoreSession } from '@/lib/ghostore-auth';
@@ -252,6 +253,7 @@ export function Dashboard() {
     <Layout className="vt-shell" style={{ background: 'transparent', minHeight: '100vh' }}>
       <Content style={{ paddingTop: 0 }}>
         <DashboardHeader hasResult={Boolean(result)} onOpenAttestation={() => setModalOpen(true)} />
+        <OfficialSignalBanner />
         <VerifyHashBanner onOpenAttestation={() => setModalOpen(true)} onLoadResult={loadVerifiedResult} />
         <Row gutter={[12, 12]} align="stretch">
           <Col xs={24} lg={15} className="vt-stretch-col">
