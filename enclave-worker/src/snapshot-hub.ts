@@ -1,5 +1,6 @@
 import { fetchNearTvlSeries, fetchPriceSeries, mergeSeries, timeframeToDays } from './fetcher';
-import { deriveSyntheticFactors, fetchGithubCommits7d, type ThesisFactors } from './factors';
+import { fetchGithubCommits7d, loadMarketFactors, type ThesisFactors } from './factors';
+import { computeTvlNetFlow7dMusd } from './market-factors';
 import { analyzeMergedSeries } from './analyzer';
 import { fetchNearOnchainTelemetrySafe } from './near-rpc';
 import type { NearOnchainTelemetry, TargetToken, ThesisInput, ThesisResult, Timeframe } from './types';
@@ -14,6 +15,8 @@ export type HubDataSnapshot = {
   prices_ref: { date: string; price: number }[];
   tvl_near: { date: string; tvl: number }[];
   github_commits_7d: number;
+  funding_rate_bps?: number;
+  tvl_net_flow_7d_musd?: number;
 };
 
 export async function pullMarketSnapshot(): Promise<Omit<HubDataSnapshot, 'id' | 'fetched_at' | 'status'>> {
@@ -25,7 +28,16 @@ export async function pullMarketSnapshot(): Promise<Omit<HubDataSnapshot, 'id' |
     fetchNearOnchainTelemetrySafe(),
     fetchGithubCommits7d(),
   ]);
-  return { prices_near, prices_ref, tvl_near, near_rpc: near_rpc ?? null, github_commits_7d };
+  const market = await loadMarketFactors(tvl_near);
+  return {
+    prices_near,
+    prices_ref,
+    tvl_near,
+    near_rpc: near_rpc ?? null,
+    github_commits_7d,
+    funding_rate_bps: market.funding_rate_bps,
+    tvl_net_flow_7d_musd: market.tvl_net_flow_7d_musd,
+  };
 }
 
 function sliceByTimeframe<T extends { date: string }>(rows: T[], timeframe: Timeframe): T[] {
@@ -47,12 +59,19 @@ export function buildSeriesFromSnapshot(
 }
 
 export function factorsFromSnapshot(snapshot: HubDataSnapshot, series: ReturnType<typeof mergeSeries>): ThesisFactors {
-  const synth = deriveSyntheticFactors(series);
+  const funding = Number.isFinite(snapshot.funding_rate_bps)
+    ? Number(snapshot.funding_rate_bps)
+    : 0;
+  const tvlFlow = Number.isFinite(snapshot.tvl_net_flow_7d_musd)
+    ? Number(snapshot.tvl_net_flow_7d_musd)
+    : computeTvlNetFlow7dMusd(snapshot.tvl_near ?? []);
   return {
     github_commits_7d: snapshot.github_commits_7d,
-    ...synth,
+    funding_rate_bps: funding,
+    whale_net_flow_musd: tvlFlow,
   };
 }
+
 
 export async function runThesisAnalysisFromSnapshot(
   input: ThesisInput,

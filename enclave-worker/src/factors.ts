@@ -1,12 +1,13 @@
 import type { SeriesPoint } from './types';
 import { pctChange } from './math';
 import { fetchWithTimeout } from './http';
+import { computeTvlNetFlow7dMusd, fetchNearPerpFundingBps } from './market-factors';
 
 export type ThesisFactors = {
   github_commits_7d: number;
-  /** Demo synthetic — label in data_sources until paid perp feed in TEE */
+  /** Binance NEARUSDT perp last funding rate (bps). */
   funding_rate_bps: number;
-  /** Demo synthetic — derived from TVL momentum */
+  /** NEAR DeFi TVL 7d net change (USD millions); legacy field name `whale_*` in conclusion JSON. */
   whale_net_flow_musd: number;
 };
 
@@ -53,12 +54,11 @@ export async function fetchGithubCommits7d(): Promise<number> {
   }
 }
 
-/** Deterministic demo factors (hashed with output; replace with oracle feeds in production TEE). */
+/** @deprecated demo-only; used in tests or when live feeds unavailable */
 export function deriveSyntheticFactors(series: SeriesPoint[]): Pick<ThesisFactors, 'funding_rate_bps' | 'whale_net_flow_musd'> {
   if (series.length < 2) {
     return { funding_rate_bps: 0, whale_net_flow_musd: 0 };
   }
-  // pctChange guards zero prices, so this never produces Infinity/NaN.
   const changes = pctChange(series.map((s) => s.price_usd));
   const vol = changes.reduce((a, c) => a + Math.abs(c), 0) / changes.length;
   const funding_rate_bps = Math.round(vol * 10000 * 10) / 10;
@@ -67,10 +67,33 @@ export function deriveSyntheticFactors(series: SeriesPoint[]): Pick<ThesisFactor
   return { funding_rate_bps, whale_net_flow_musd };
 }
 
+export type MarketFactorSnapshot = {
+  funding_rate_bps: number;
+  tvl_net_flow_7d_musd: number;
+};
+
+export async function loadMarketFactors(
+  tvlRows: { date: string; tvl: number }[],
+): Promise<MarketFactorSnapshot> {
+  let funding_rate_bps = 0;
+  try {
+    funding_rate_bps = await fetchNearPerpFundingBps();
+  } catch {
+    // Ingest still succeeds; UI treats 0 as “missing” for bullish downgrade
+  }
+  const tvl_net_flow_7d_musd = computeTvlNetFlow7dMusd(tvlRows);
+  return { funding_rate_bps, tvl_net_flow_7d_musd };
+}
+
 export async function loadThesisFactors(series: SeriesPoint[]): Promise<ThesisFactors> {
-  const [github_commits_7d, synth] = await Promise.all([
+  const tvlRows = series.map((s) => ({ date: s.date, tvl: s.defi_tvl_usd }));
+  const [github_commits_7d, market] = await Promise.all([
     fetchGithubCommits7d(),
-    Promise.resolve(deriveSyntheticFactors(series)),
+    loadMarketFactors(tvlRows),
   ]);
-  return { github_commits_7d, ...synth };
+  return {
+    github_commits_7d,
+    funding_rate_bps: market.funding_rate_bps,
+    whale_net_flow_musd: market.tvl_net_flow_7d_musd,
+  };
 }

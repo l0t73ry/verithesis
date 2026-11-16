@@ -151,6 +151,7 @@
     "expandMetrics": "Корреляция и точность",
     "trustLine": "вход {hash}… · {provider} · quote {quote} — открыть аттестацию",
     "factorDemo": "funding / whale: демо-синтетика",
+    "factorSources": "funding=Binance NEAR perp; TVL 7dΔ=DefiLlama",
     "nearValidatorsTag": "NEAR #{height} · {validators} валидаторов",
     "nearStakeTag": "Стейк {staked}M NEAR ({ratio}%)"
   },

@@ -151,6 +151,7 @@
     "expandMetrics": "More correlation & hit-rate metrics",
     "trustLine": "input {hash}… · {provider} · quote {quote} — open attestation",
     "factorDemo": "funding / whale: demo synthetic",
+    "factorSources": "funding=Binance NEAR perp; TVL 7dΔ=DefiLlama",
     "nearValidatorsTag": "NEAR #{height} · {validators} validators",
     "nearStakeTag": "Staked {staked}M NEAR ({ratio}%)"
   },

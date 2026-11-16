@@ -36,7 +36,8 @@ export { parseThesisInput } from './input';
 export { buildRunReceipt, type RunReceipt } from './receipt';
 export { callOutLayerThesis, isOutLayerConfigured } from './outlayer-coordinator';
 export { runThesisInLocalTee, wasmArtifactAvailable } from './local-tee';
-export { loadThesisFactors, deriveSyntheticFactors, type ThesisFactors } from './factors';
+export { loadThesisFactors, loadMarketFactors, deriveSyntheticFactors, type ThesisFactors } from './factors';
+export { computeTvlNetFlow7dMusd, fetchNearPerpFundingBps } from './market-factors';
 export { planVaultExecution } from './vault';
 export type { VaultExecutionPlan } from './vault';
 export {

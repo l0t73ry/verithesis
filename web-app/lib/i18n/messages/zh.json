@@ -82,8 +82,8 @@
     "triggerBearMom": "看空触发：近 3 日价格动量合计 &lt; -5%",
     "triggerNeutral": "中性：未同时满足看多阈值，也未命中看空阈值",
     "downgradeGh": "（说明）若满足看多阈值，GitHub 7d&lt;12 会把看多降为中性",
-    "downgradeFunding": "（说明）若满足看多阈值，高 funding demo 因子会把看多降为中性",
-    "downgradeWhale": "（说明）若满足看多阈值，鲸鱼 demo 因子会把看多降为中性"
+    "downgradeFunding": "（说明）若满足看多阈值，Binance funding &gt; 12bps 会把看多降为中性",
+    "downgradeWhale": "（说明）若满足看多阈值，TVL 7d 净流出 &lt; -2M USD 会把看多降为中性"
   },
   "empty": {
     "title": "还没有分析记录",
@@ -151,6 +151,7 @@
     "expandMetrics": "展开相关性与命中率",
     "trustLine": "输入 {hash}… · {provider} · 报价 {quote} — 查看证明",
     "factorDemo": "funding / 巨鲸：演示合成数据",
+    "factorSources": "funding=Binance NEAR 永续；TVL 7dΔ=DefiLlama",
     "nearValidatorsTag": "NEAR #{height} · {validators} 验证节点",
     "nearStakeTag": "质押 {staked}M NEAR ({ratio}%)"
   },

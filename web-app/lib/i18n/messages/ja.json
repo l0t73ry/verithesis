@@ -151,6 +151,7 @@
     "expandMetrics": "相関・命中率の詳細",
     "trustLine": "入力 {hash}… · {provider} · quote {quote} — 証明を開く",
     "factorDemo": "funding / whale：デモ合成",
+    "factorSources": "funding=Binance NEAR 先物; TVL 7dΔ=DefiLlama",
     "nearValidatorsTag": "NEAR #{height} · {validators} バリデータ",
     "nearStakeTag": "ステーク {staked}M NEAR ({ratio}%)"
   },

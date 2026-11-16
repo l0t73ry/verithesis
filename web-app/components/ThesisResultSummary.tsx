@@ -135,11 +135,11 @@ export function ThesisResultSummary({
           <Tag variant="filled" color="cyan">
             GitHub {c.github_commits_7d ?? 0}/7d
           </Tag>
-          <Tag variant="filled">funding ~{c.funding_rate_bps ?? 0} bps</Tag>
-          <Tag variant="filled">whale ~{c.whale_net_flow_musd ?? 0}M</Tag>
+          <Tag variant="filled">Binance funding {c.funding_rate_bps ?? 0} bps</Tag>
+          <Tag variant="filled">TVL 7d Δ {c.whale_net_flow_musd ?? 0}M USD</Tag>
           <Tag variant="filled">w_tvl {Math.round((c.tvl_weight ?? 0.5) * 100)}%</Tag>
           <Tag color="default" variant="filled" style={{ fontSize: 11 }}>
-            {t('results.factorDemo')}
+            {t('results.factorSources')}
           </Tag>
         </Space>
       </div>

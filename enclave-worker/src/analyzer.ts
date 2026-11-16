@@ -215,7 +215,8 @@ export function analyzeMergedSeries(
     `CoinGecko market_chart (${input.target_token})`,
     'DefiLlama historicalChainTvl/NEAR',
     'GitHub nearcore commits (7d, public API)',
-    'Funding / whale flow: synthetic demo factors (TEE oracle in production)',
+    'Binance NEARUSDT perp funding (bps)',
+    'NEAR DeFi TVL 7d net change (USD M, DefiLlama)',
   ];
 
   const vault_eligible =
