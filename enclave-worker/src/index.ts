@@ -39,6 +39,13 @@ export { runThesisInLocalTee, wasmArtifactAvailable } from './local-tee';
 export { loadThesisFactors, deriveSyntheticFactors, type ThesisFactors } from './factors';
 export { planVaultExecution } from './vault';
 export type { VaultExecutionPlan } from './vault';
+export {
+  pullMarketSnapshot,
+  buildSeriesFromSnapshot,
+  runThesisAnalysisFromSnapshot,
+  factorsFromSnapshot,
+  type HubDataSnapshot,
+} from './snapshot-hub';
 export type {
   AttestationBundle,
   NearOnchainTelemetry,

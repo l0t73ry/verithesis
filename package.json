@@ -15,6 +15,7 @@
     "build:wasm": "bash outlayer/build-wasm.sh",
     "verify:wasm": "npm run build:wasm && tsx bin/verify-wasm.mjs",
     "mock:outlayer": "tsx bin/mock-outlayer-coordinator.ts",
+    "ingest:snapshot": "tsx bin/ingest-snapshot-hub.mjs",
     "verify:p0": "npm run verify:wasm"
   }
 }

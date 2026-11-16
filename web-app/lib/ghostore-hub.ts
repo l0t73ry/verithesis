@@ -1,4 +1,4 @@
-import type { ThesisResult } from '@verithesis/enclave-worker';
+import type { HubDataSnapshot, ThesisResult } from '@verithesis/enclave-worker';
 import { ghostoreUpstreamBase, hubArchiveEnabled } from '@/lib/ghostore-upstream';
 
 export function isHubArchiveEnabled(): boolean {
@@ -54,6 +54,18 @@ export type GhostoreQuota = {
   runs_limit: number;
   remaining: number;
 };
+
+export async function fetchLatestHubSnapshot(): Promise<HubDataSnapshot | null> {
+  const base = ghostoreUpstreamBase();
+  try {
+    const res = await fetch(`${base}/api/verithesis/snapshot/latest`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    const body = (await res.json()) as { data?: HubDataSnapshot };
+    return body.data ?? null;
+  } catch {
+    return null;
+  }
+}
 
 export async function fetchHubQuota(accessToken: string): Promise<GhostoreQuota | null> {
   const base = ghostoreUpstreamBase();

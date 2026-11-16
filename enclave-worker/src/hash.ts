@@ -23,16 +23,18 @@ export function sha256Hex(payload: string): string {
 
 /** Hashes the canonical (clamped) parameters — must stay in sync with `hash_thesis_input` in main.rs. */
 export function hashThesisInput(input: ThesisInput): string {
-  return sha256Hex(
-    stableStringify({
-      timeframe: input.timeframe,
-      target_token: input.target_token,
-      smoothing_window: clampSmoothingWindow(input.smoothing_window),
-      tvl_weight: normalizeTvlWeight(input.tvl_weight),
-      strategy_mode: input.strategy_mode ?? 'public',
-      realtime_unlocked: Boolean(input.realtime_unlocked),
-    }),
-  );
+  const base: Record<string, unknown> = {
+    timeframe: input.timeframe,
+    target_token: input.target_token,
+    smoothing_window: clampSmoothingWindow(input.smoothing_window),
+    tvl_weight: normalizeTvlWeight(input.tvl_weight),
+    strategy_mode: input.strategy_mode ?? 'public',
+    realtime_unlocked: Boolean(input.realtime_unlocked),
+  };
+  if (input.data_snapshot_id != null && Number.isFinite(input.data_snapshot_id)) {
+    base.data_snapshot_id = Math.trunc(input.data_snapshot_id);
+  }
+  return sha256Hex(stableStringify(base));
 }
 
 export function hashOutput(result: { series: unknown; conclusion: unknown }): string {

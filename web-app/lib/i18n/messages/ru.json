@@ -36,6 +36,8 @@
     "snapshotOut": "Выход",
     "github": "Исходный код",
     "requestFailed": "Не удалось выполнить запрос. Попробуйте снова.",
+    "loginRequired": "Войдите через Ghostore перед запуском анализа",
+    "snapshotMissing": "На Hub ещё нет снимка рынка. Дождитесь ingest или свяжитесь с админом",
     "resultsTitle": "Выводы",
     "paramsTitle": "Настройки",
     "tee": "Безопасный анклав",

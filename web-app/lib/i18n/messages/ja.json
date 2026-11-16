@@ -36,6 +36,8 @@
     "snapshotOut": "出力",
     "github": "ソースコード",
     "requestFailed": "エラーが発生しました。もう一度お試しください。",
+    "loginRequired": "分析の前に Ghostore でサインインしてください",
+    "snapshotMissing": "Hub に市場スナップショットがありません。ingest を待つか運用に連絡してください",
     "resultsTitle": "インサイト",
     "paramsTitle": "設定",
     "tee": "セキュアエンクレーブ",

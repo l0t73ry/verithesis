@@ -12,6 +12,8 @@ export interface ThesisInput {
   realtime_unlocked?: boolean;
   payment_receipt?: string | null;
   code_measurement?: string;
+  /** Hub `verithesis_data_snapshots.id` — bound into input_hash when set. */
+  data_snapshot_id?: number;
 }
 
 export interface SeriesPoint {

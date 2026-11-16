@@ -16,8 +16,8 @@ VeriThesis 账号、运行归档与配额由 **Ghostore** 提供；**浏览器�
 
 | 仓库 | 分支 |
 |------|------|
-| `verithesis` | `product/v1-ghostore-account` |
-| `ghostore` | `feature/verithesis-hub-api` |
+| `verithesis` | `product/v1-ghostore-account`（**勿推 `main`**） |
+| `ghostore` | `main` |
 
 ## Ghostore API
 
@@ -31,7 +31,17 @@ VeriThesis 账号、运行归档与配额由 **Ghostore** 提供；**浏览器�
 cd ghostore/server && node scripts/migrate.js
 ```
 
-迁移：`030-verithesis-runs.js` → 表 `verithesis_runs`。
+迁移：
+
+- `030-verithesis-runs.js` → `verithesis_runs`
+- `031-verithesis-data-snapshots.js` → `verithesis_data_snapshots`（cron 灌库 raw 层）
+
+## 市场快照（最终设计）
+
+1. **Cron** `verithesisIngest`（每 30min）→ `npx tsx verithesis/bin/ingest-snapshot-hub.mjs` → `POST /api/verithesis/snapshots/ingest`
+2. **rerun**（`VERITHESIS_SNAPSHOT_ONLY=1`）只读 `GET /api/verithesis/snapshot/latest`，**不**再打 CoinGecko/RPC
+3. **`VERITHESIS_REQUIRE_AUTH=1`**：`rerun` 必须 Ghostore 登录（Bearer）
+4. 环境：`VERITHESIS_REPO_PATH`、`VERITHESIS_INGEST_KEY`（ghostore 与 ingest 脚本一致）
 
 ## 环境变量
 

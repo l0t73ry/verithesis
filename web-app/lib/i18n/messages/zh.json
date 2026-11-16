@@ -36,6 +36,8 @@
     "snapshotOut": "输出",
     "github": "源代码",
     "requestFailed": "请求失败，请稍后重试",
+    "loginRequired": "请先登录 Ghostore 后再运行分析",
+    "snapshotMissing": "Hub 尚无市场快照，请等待 ingest 任务或联系运维",
     "resultsTitle": "结论",
     "paramsTitle": "分析配置",
     "tee": "安全飞地",

@@ -185,8 +185,12 @@ export function Dashboard() {
         headers: authHeaders,
         body: JSON.stringify(body),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? res.statusText);
+      const data = (await res.json()) as { error?: string; code?: string };
+      if (!res.ok) {
+        if (data.code === 'AUTH_REQUIRED') throw new Error(t('dashboard.loginRequired'));
+        if (data.code === 'SNAPSHOT_MISSING') throw new Error(t('dashboard.snapshotMissing'));
+        throw new Error(data.error ?? res.statusText);
+      }
       const next = data as ThesisResult;
       setResult(next);
       await putLocalRun(next);

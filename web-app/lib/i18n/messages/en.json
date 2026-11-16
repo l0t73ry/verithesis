@@ -36,6 +36,8 @@
     "snapshotOut": "Output",
     "github": "Source code",
     "requestFailed": "Something went wrong. Please try again.",
+    "loginRequired": "Sign in with Ghostore before running analysis",
+    "snapshotMissing": "No market snapshot on Hub yet. Wait for ingest or contact ops",
     "resultsTitle": "Insights",
     "paramsTitle": "Configuration",
     "tee": "Secure enclave",

@@ -1,6 +1,10 @@
-import { parseThesisInput, runThesisAnalysis } from '@verithesis/enclave-worker';
+import {
+  parseThesisInput,
+  runThesisAnalysis,
+  runThesisAnalysisFromSnapshot,
+} from '@verithesis/enclave-worker';
 import type { ThesisInput } from '@verithesis/enclave-worker';
-import { archiveRunToHub } from '@/lib/ghostore-hub';
+import { archiveRunToHub, fetchLatestHubSnapshot } from '@/lib/ghostore-hub';
 import { archiveRun } from '@/lib/run-archive';
 import { isPaymentReceiptValid } from '@/lib/payment';
 import { envLimit, rateLimit } from '@/lib/rate-limit';
@@ -8,11 +12,9 @@ import { appendSnapshot } from '@/lib/snapshots';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-// Upstream fetches (CoinGecko + DefiLlama + GitHub) plus the WASM gate can exceed Vercel's 10s default.
 export const maxDuration = 30;
 
 const RERUN_LIMIT_PER_MIN = envLimit('VERITHESIS_RATE_LIMIT_RERUN_PER_MIN', 20);
-// TEE runs spend the server's paid OutLayer key / WASM CPU — keep them on a tighter budget.
 const TEE_LIMIT_PER_MIN = envLimit('VERITHESIS_RATE_LIMIT_TEE_PER_MIN', 6);
 
 function bearerToken(req: Request): string | null {
@@ -22,11 +24,17 @@ function bearerToken(req: Request): string | null {
   return t || null;
 }
 
+function requireAuth(): boolean {
+  return process.env.VERITHESIS_REQUIRE_AUTH !== '0';
+}
+
+function snapshotOnly(): boolean {
+  return process.env.VERITHESIS_SNAPSHOT_ONLY !== '0';
+}
+
 function parseBody(body: unknown): ThesisInput & { tee: boolean } {
   const params = parseThesisInput(body);
   const o = body as Record<string, unknown>;
-  // Realtime access is decided by the server from the receipt; `realtime_unlocked` in the body
-  // is deliberately ignored.
   const payment_receipt = isPaymentReceiptValid(o.payment_receipt) ? o.payment_receipt : null;
   return {
     ...params,
@@ -38,6 +46,11 @@ function parseBody(body: unknown): ThesisInput & { tee: boolean } {
 
 export async function POST(req: Request) {
   try {
+    const hubToken = bearerToken(req);
+    if (requireAuth() && !hubToken) {
+      return Response.json({ error: 'Login required', code: 'AUTH_REQUIRED' }, { status: 401 });
+    }
+
     const limited = rateLimit(req, 'rerun', RERUN_LIMIT_PER_MIN);
     if (limited) return limited;
 
@@ -51,14 +64,35 @@ export async function POST(req: Request) {
 
     const code_measurement =
       process.env.VERITHESIS_CODE_MEASUREMENT ?? process.env.VERCEL_GIT_COMMIT_SHA ?? undefined;
-    const result = await runThesisAnalysis({ ...input, code_measurement }, { tee });
+    const baseInput: ThesisInput = { ...input, code_measurement };
+
+    let result;
+    if (snapshotOnly()) {
+      const snap = await fetchLatestHubSnapshot();
+      if (!snap) {
+        return Response.json(
+          { error: 'No market snapshot on Hub. Run ingest cron first.', code: 'SNAPSHOT_MISSING' },
+          { status: 503 },
+        );
+      }
+      const fetchedAt =
+        typeof snap.fetched_at === 'string'
+          ? snap.fetched_at
+          : new Date(snap.fetched_at as unknown as string).toISOString();
+      const hubSnap = { ...snap, fetched_at: fetchedAt };
+      result = await runThesisAnalysisFromSnapshot(
+        { ...baseInput, data_snapshot_id: snap.id },
+        hubSnap,
+        { tee },
+      );
+    } else {
+      result = await runThesisAnalysis(baseInput, { tee });
+    }
+
     archiveRun(result);
-    const hubToken = bearerToken(req);
     if (hubToken) {
       const hub = await archiveRunToHub(result, hubToken, 'public');
-      if (!hub.ok) {
-        console.warn('[verithesis] hub archive failed:', hub.error);
-      }
+      if (!hub.ok) console.warn('[verithesis] hub archive failed:', hub.error);
     }
     if (result.snapshot) appendSnapshot(result.snapshot);
     return Response.json(result);

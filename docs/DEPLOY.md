@@ -32,3 +32,15 @@ npm run dev
 ## Verify hashes locally
 
 After a run, copy `input_hash` and `output_hash` from the attestation drawer; re-POST the same `{ timeframe, target_token }` — hashes must match for identical data window (live APIs may drift slightly if new daily candle).
+
+## Ghostore（产品分支）
+
+Vercel **仅需服务端** `GHOSTORE_API_URL=https://api.ghostore.pw`（不要 `NEXT_PUBLIC_GHOSTORE_API`）。
+
+| 变量 | 说明 |
+|------|------|
+| `VERITHESIS_REQUIRE_AUTH=1` | `rerun` 必须登录 |
+| `VERITHESIS_SNAPSHOT_ONLY=1` | `rerun` 只读 Hub 市场快照，不打上游 API |
+| `VERITHESIS_DISABLE_HUB_ARCHIVE=1` | 可选：不归档 runs |
+
+市场数据由 Ghostore cron `ingest:snapshot` 写入；详见 `docs/GHOSTORE-INTEGRATION.md`。
