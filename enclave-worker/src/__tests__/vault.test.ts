@@ -26,7 +26,7 @@ describe('planVaultExecution', () => {
     r.conclusion.signal = 'bullish';
     r.vault_eligible = false;
     process.env.VERITHESIS_VAULT_ENABLED = '1';
-    const plan = planVaultExecution(r);
+    const plan = planVaultExecution(r, { official_signal: 'neutral', vault_trades_today: 0 });
     assert.equal(plan.status, 'rejected');
     assert.equal(plan.reason, 'dao_risk_vault_eligible');
   });
@@ -37,10 +37,13 @@ describe('planVaultExecution', () => {
     r.vault_eligible = true;
     process.env.VERITHESIS_VAULT_ENABLED = '1';
     process.env.VERITHESIS_VAULT_NETWORK = 'evil-net';
-    const plan = planVaultExecution(r);
+    const plan = planVaultExecution(r, { official_signal: 'neutral', vault_trades_today: 0 });
     assert.equal(plan.status, 'planned');
     assert.equal(plan.network, 'near-testnet');
     process.env.VERITHESIS_VAULT_NETWORK = 'near-mainnet';
-    assert.equal(planVaultExecution(r).network, 'near-mainnet');
+    assert.equal(
+      planVaultExecution(r, { official_signal: 'neutral', vault_trades_today: 0 }).network,
+      'near-mainnet',
+    );
   });
 });

@@ -89,22 +89,14 @@ export async function fetchVaultHubContext(accessToken: string): Promise<{
       headers: { Authorization: `Bearer ${accessToken}` },
       cache: 'no-store',
     });
-    if (!res.ok) {
-      return {
-        official_signal: official?.signal ?? null,
-        vault_trades_today: 0,
-      };
-    }
+    if (!res.ok) return null;
     const body = (await res.json()) as { data?: { vault_trades_today?: number } };
     return {
       official_signal: official?.signal ?? null,
       vault_trades_today: Number(body.data?.vault_trades_today) || 0,
     };
   } catch {
-    return {
-      official_signal: official?.signal ?? null,
-      vault_trades_today: 0,
-    };
+    return null;
   }
 }
 

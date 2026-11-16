@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { BellOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Alert, Button, Form, Input, List, Space, Typography } from 'antd';
 import { loadGhostoreSession } from '@/lib/ghostore-auth';
@@ -13,10 +13,12 @@ type SubRow = { id: number; webhook_url: string; enabled: number; created_at: st
 export function SignalSubscribePanel() {
   const { t } = useI18n();
   const { session } = useGhostoreAuth();
+  const accessToken = session?.accessToken;
   const [items, setItems] = useState<SubRow[]>([]);
   const [secret, setSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const loadedFor = useRef<string | null>(null);
 
   const authHeaders = useCallback((): Record<string, string> => {
     const gs = loadGhostoreSession();
@@ -24,21 +26,30 @@ export function SignalSubscribePanel() {
   }, []);
 
   const reload = useCallback(async () => {
-    if (!session) return;
+    if (!accessToken) return;
     setError(null);
     try {
       const res = await fetch('/api/ghostore/signals/subscriptions', { headers: authHeaders(), cache: 'no-store' });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(apiErrorMessage(res.status, body, res.statusText));
-      setItems(body.data?.items ?? []);
+      setItems((body as { data?: { items?: SubRow[] } }).data?.items ?? []);
     } catch (e) {
       setError(e instanceof Error ? e.message : t('dashboard.requestFailed'));
     }
-  }, [authHeaders, session, t]);
+  }, [accessToken, authHeaders, t]);
 
   useEffect(() => {
+    if (!accessToken) {
+      loadedFor.current = null;
+      setItems([]);
+      return;
+    }
+    if (loadedFor.current === accessToken) return;
+    loadedFor.current = accessToken;
     void reload();
-  }, [reload]);
+    // 仅随 accessToken 拉列表；勿把 reload/t 放进 deps，避免重复请求
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional
+  }, [accessToken]);
 
   if (!session) return null;
 

@@ -40,7 +40,7 @@ export function OfficialSignalBanner() {
     return () => {
       cancelled = true;
     };
-  }, [t]);
+  }, []);
 
   if (loading) {
     return (

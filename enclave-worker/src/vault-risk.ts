@@ -24,6 +24,10 @@ function envNum(key: string, fallback: number): number {
   return Number.isFinite(n) ? n : fallback;
 }
 
+function requireOfficialSignal(): boolean {
+  return process.env.VERITHESIS_VAULT_REQUIRE_OFFICIAL !== '0';
+}
+
 /** DAO-style policy gates before any TEE vault plan is emitted. */
 export function evaluateVaultDaoRisk(result: ThesisResult, ctx: VaultRiskContext = {}): VaultRiskGate[] {
   const c = result.conclusion;
@@ -48,8 +52,16 @@ export function evaluateVaultDaoRisk(result: ThesisResult, ctx: VaultRiskContext
     },
     {
       id: 'official_not_bearish',
-      pass: official == null || official !== 'bearish',
-      detail: official == null ? 'no official signal in context' : `official=${official}`,
+      pass: requireOfficialSignal()
+        ? official != null && official !== 'bearish'
+        : official == null || official !== 'bearish',
+      detail: requireOfficialSignal()
+        ? official == null
+          ? 'official signal required but missing'
+          : `official=${official}`
+        : official == null
+          ? 'no official signal in context'
+          : `official=${official}`,
     },
     {
       id: 'max_drawdown',

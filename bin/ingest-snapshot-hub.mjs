@@ -19,6 +19,7 @@ async function postJson(path, body) {
     headers: {
       'Content-Type': 'application/json',
       'X-Verithesis-Ingest-Key': key,
+      'X-Verithesis-Ingest-Source': 'snapshot-hub-v1',
     },
     body: JSON.stringify(body),
   });

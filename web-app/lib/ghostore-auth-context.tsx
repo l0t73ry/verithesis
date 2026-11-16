@@ -60,7 +60,9 @@ export function GhostoreAuthProvider({ children }: { children: ReactNode }) {
       if (first.status === 401) {
         try {
           active = await refreshGhostoreSession(active);
-          setSession(active);
+          setSession((prev) =>
+            prev?.accessToken === active.accessToken && prev?.refreshToken === active.refreshToken ? prev : active,
+          );
         } catch {
           logoutGhostore();
           setSession(null);
@@ -72,7 +74,9 @@ export function GhostoreAuthProvider({ children }: { children: ReactNode }) {
         return;
       }
       setQuota(first.quota);
-      setSession(active);
+      setSession((prev) =>
+        prev?.accessToken === active.accessToken && prev?.refreshToken === active.refreshToken ? prev : active,
+      );
     })();
 
     refreshMutex.current = job;

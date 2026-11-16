@@ -12,6 +12,14 @@ const series = Array.from({ length: 10 }, (_, i) => ({
 const factors = { github_commits_7d: 30, funding_rate_bps: 1, whale_net_flow_musd: 1 };
 
 describe('evaluateVaultDaoRisk', () => {
+  it('blocks vault when official signal missing (default require official)', () => {
+    const r = analyzeMergedSeries(series, { timeframe: '30d', target_token: 'NEAR' }, { factors });
+    r.conclusion.signal = 'bullish';
+    r.vault_eligible = true;
+    const gates = evaluateVaultDaoRisk(r, { official_signal: null, vault_trades_today: 0 });
+    assert.equal(vaultRiskApproved(gates), false);
+  });
+
   it('blocks vault when official signal is bearish', () => {
     const r = analyzeMergedSeries(series, { timeframe: '30d', target_token: 'NEAR' }, { factors });
     r.conclusion.signal = 'bullish';
