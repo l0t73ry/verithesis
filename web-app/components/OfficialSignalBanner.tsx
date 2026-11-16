@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Alert, Spin, Tag, Typography } from 'antd';
 import { useI18n } from '@/lib/i18n/context';
 import { signalVisual } from '@/lib/signal-visual';
+import { messageFromGhostoreBody } from '@/lib/ghostore-api-error';
 
 type OfficialSignalPayload = {
   signal: 'bullish' | 'bearish' | 'neutral';
@@ -28,7 +29,7 @@ export function OfficialSignalBanner() {
       try {
         const res = await fetch('/api/thesis/signal/latest', { cache: 'no-store' });
         const body = (await res.json()) as { data?: OfficialSignalPayload; error?: string };
-        if (!res.ok) throw new Error(body.error ?? res.statusText);
+        if (!res.ok) throw new Error(messageFromGhostoreBody(body, res.statusText));
         if (!cancelled) setData(body.data ?? null);
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : t('dashboard.requestFailed'));

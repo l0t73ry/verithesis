@@ -6,6 +6,7 @@ import { Alert, Button, Form, Input, List, Space, Typography } from 'antd';
 import { loadGhostoreSession } from '@/lib/ghostore-auth';
 import { useGhostoreAuth } from '@/lib/ghostore-auth-context';
 import { useI18n } from '@/lib/i18n/context';
+import { apiErrorMessage } from '@/lib/ghostore-api-error';
 
 type SubRow = { id: number; webhook_url: string; enabled: number; created_at: string };
 
@@ -27,8 +28,8 @@ export function SignalSubscribePanel() {
     setError(null);
     try {
       const res = await fetch('/api/ghostore/signals/subscriptions', { headers: authHeaders(), cache: 'no-store' });
-      const body = (await res.json()) as { data?: { items?: SubRow[] }; error?: string };
-      if (!res.ok) throw new Error(body.error ?? res.statusText);
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(apiErrorMessage(res.status, body, res.statusText));
       setItems(body.data?.items ?? []);
     } catch (e) {
       setError(e instanceof Error ? e.message : t('dashboard.requestFailed'));
@@ -51,8 +52,8 @@ export function SignalSubscribePanel() {
         headers: { 'content-type': 'application/json', ...authHeaders() },
         body: JSON.stringify({ webhook_url: values.webhook_url.trim() }),
       });
-      const body = (await res.json()) as { data?: { webhook_secret?: string }; error?: string };
-      if (!res.ok) throw new Error(body.error ?? res.statusText);
+      const body = (await res.json()) as { data?: { webhook_secret?: string } };
+      if (!res.ok) throw new Error(apiErrorMessage(res.status, body, res.statusText));
       setSecret(body.data?.webhook_secret ?? null);
       await reload();
     } catch (e) {
