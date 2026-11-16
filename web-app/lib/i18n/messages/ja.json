@@ -169,13 +169,23 @@
   },
   "vault": {
     "drawerTitle": "TEE ボールト実行計画",
-    "drawerIntro": "審査用プレビューです。この UI からチェーン上の swap は送りません。",
+    "drawerIntro": "DAO リスクゲート通過後のみ planned。チェーン送信はしません。",
     "status": "状態",
     "reason": "理由",
     "network": "ネットワーク",
     "dex": "DEX",
     "swap": "スワップ",
-    "policy": "ポリシー"
+    "policy": "ポリシー",
+    "daoTitle": "DAO リスク",
+    "daoApproved": "通過",
+    "daoRejected": "未通過"
+  },
+  "signalSub": {
+    "title": "公式シグナル Webhook",
+    "intro": "公式シグナルのエッジ変化時のみ Hub が POST（HMAC 署名可）。",
+    "webhook": "Webhook URL（https）",
+    "add": "登録",
+    "secretOnce": "署名シークレット（一度だけ表示）："
   },
   "snapshots": {
     "empty": "分析後、過去の実行がここに表示されます。選択して出力ハッシュを確認できます。",

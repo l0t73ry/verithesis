@@ -26,7 +26,6 @@ export function recentMomFromSeries(series: SeriesPoint[]): number {
   return out.slice(-3).reverse().reduce((a, b) => a + b, 0);
 }
 
-/** UI-only: why this signal label (does not affect hashes). */
 export function signalExplainKeys(
   conclusion: ThesisConclusion,
   series: SeriesPoint[],

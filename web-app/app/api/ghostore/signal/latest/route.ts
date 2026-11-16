@@ -1,4 +1,8 @@
-/**
- * 与 /api/thesis/signal/latest 同源；保留路径便于日后 Hub 托管官方信号。
- */
-export { GET } from '@/app/api/thesis/signal/latest/route';
+import { forwardGhostore } from '@/lib/ghostore-upstream';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
+export async function GET() {
+  return forwardGhostore('/api/verithesis/signal/latest');
+}

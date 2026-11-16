@@ -169,13 +169,23 @@
   },
   "vault": {
     "drawerTitle": "TEE 金库执行计划",
-    "drawerIntro": "仅供评委预览，本界面不会发起链上 swap。",
+    "drawerIntro": "DAO 风控护栏通过后才可能返回 planned；本界面不会发起链上 swap。",
     "status": "状态",
     "reason": "原因",
     "network": "网络",
     "dex": "DEX",
     "swap": "兑换",
-    "policy": "限额策略"
+    "policy": "限额策略",
+    "daoTitle": "DAO 风控",
+    "daoApproved": "护栏通过",
+    "daoRejected": "护栏未通过"
+  },
+  "signalSub": {
+    "title": "官方信号 Webhook 订阅",
+    "intro": "仅当官方信号标签发生跃迁（如中性→看空）时，Hub 会向你的 HTTPS 回调 POST 事件（含 HMAC 签名）。",
+    "webhook": "Webhook URL（https）",
+    "add": "添加订阅",
+    "secretOnce": "请立即保存签名密钥（仅显示一次）："
   },
   "snapshots": {
     "empty": "运行分析后，历史记录会出现在这里。点选可查看摘要与输出哈希。",

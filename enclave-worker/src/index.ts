@@ -40,6 +40,16 @@ export { loadThesisFactors, loadMarketFactors, deriveSyntheticFactors, type Thes
 export { computeTvlNetFlow7dMusd, fetchNearPerpFundingBps } from './market-factors';
 export { planVaultExecution } from './vault';
 export type { VaultExecutionPlan } from './vault';
+export { evaluateVaultDaoRisk, vaultRiskApproved } from './vault-risk';
+export type { VaultRiskContext, VaultRiskGate, VaultRiskGateId } from './vault-risk';
+export { officialThesisInput, buildOfficialSignalPayload, suggestedActionFromSignal } from './official-signal';
+export type { SuggestedAction } from './official-signal';
+export {
+  signalExplainKeys,
+  formatRecentMomPct,
+  recentMomFromSeries,
+  type SignalExplainKey,
+} from './signal-explainer';
 export {
   pullMarketSnapshot,
   buildSeriesFromSnapshot,

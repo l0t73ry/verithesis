@@ -11,7 +11,9 @@ VeriThesis 账号、运行归档与配额由 **Ghostore** 提供；**浏览器�
 | `GET /api/ghostore/quota` | `app/api/ghostore/quota` | `GET /api/verithesis/quota` |
 | `POST /api/thesis/rerun`（带 Bearer） | 服务端 `archiveRunToHub` | `POST /api/verithesis/runs` |
 | `GET /api/thesis/verify` | `fetchPublicRunFromHub` | `GET /api/verithesis/public/runs/:ref` |
-| `GET /api/thesis/signal/latest` | `fetchLatestHubSnapshot` + 固定配置 rerun | `GET /api/verithesis/snapshot/latest`（**公开，无需 Bearer**） |
+| `GET /api/thesis/signal/latest` | 优先 `GET /api/verithesis/signal/latest`（持久化），否则现场重算 | Hub 表 `verithesis_official_signals` |
+| `POST /api/ghostore/signals/subscribe` | 转发 | `POST /api/verithesis/signals/subscribe`（**需登录**） |
+| `POST /api/thesis/vault` | `planVaultExecution` + Hub 审计 | `POST /api/verithesis/vault/plan`（**planned 时写入 `verithesis_vault_audit`**） |
 
 ## 分支
 
@@ -39,7 +41,7 @@ cd ghostore/server && node scripts/migrate.js
 
 ## 市场快照（最终设计）
 
-1. **Cron** `verithesisIngest`（每 30min）→ `npx tsx verithesis/bin/ingest-snapshot-hub.mjs` → `POST /api/verithesis/snapshots/ingest`
+1. **Cron** `verithesisIngest`（每 30min）→ `ingest-snapshot-hub.mjs` → `POST …/snapshots/ingest` 后 **`POST …/signals/ingest`**（固定 90d/NEAR 官方信号，边沿触发 Webhook）
 2. **rerun**（`VERITHESIS_SNAPSHOT_ONLY=1`）只读 `GET /api/verithesis/snapshot/latest`，**不**再打 CoinGecko/RPC
 3. **`VERITHESIS_REQUIRE_AUTH=1`**：`rerun` 必须 Ghostore 登录（Bearer）；**`GET /api/thesis/signal/latest` 始终公开**
 4. 环境：`VERITHESIS_REPO_PATH`、`VERITHESIS_INGEST_KEY`（ghostore 与 ingest 脚本一致）

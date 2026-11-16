@@ -36,6 +36,7 @@ import { ThesisCompareChart, thesisCompareColors, type CompareRun } from './Thes
 import { VerifyHashBanner } from './VerifyHashBanner';
 import { ProductDisclosure } from './ProductDisclosure';
 import { OfficialSignalBanner } from './OfficialSignalBanner';
+import { SignalSubscribePanel } from './SignalSubscribePanel';
 import { useI18n } from '@/lib/i18n/context';
 import { mergeSnapshotLists, listLocalSnapshots, putLocalRun } from '@/lib/run-indexeddb';
 import { loadGhostoreSession } from '@/lib/ghostore-auth';
@@ -254,6 +255,7 @@ export function Dashboard() {
       <Content style={{ paddingTop: 0 }}>
         <DashboardHeader hasResult={Boolean(result)} onOpenAttestation={() => setModalOpen(true)} />
         <OfficialSignalBanner />
+        <SignalSubscribePanel />
         <VerifyHashBanner onOpenAttestation={() => setModalOpen(true)} onLoadResult={loadVerifiedResult} />
         <Row gutter={[12, 12]} align="stretch">
           <Col xs={24} lg={15} className="vt-stretch-col">

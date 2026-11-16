@@ -9,6 +9,7 @@ import { useI18n } from '@/lib/i18n/context';
 import { formatConclusionBrief } from '@/lib/conclusion-copy';
 import { renderShareCardPng } from '@/lib/share-card-canvas';
 import { VaultPlanDrawer } from './VaultPlanDrawer';
+import { loadGhostoreSession } from '@/lib/ghostore-auth';
 
 type QrState = { status: 'loading' } | { status: 'ready'; src: string } | { status: 'failed' };
 
@@ -129,9 +130,12 @@ export function ResultActionBar({
 
   async function openVault() {
     try {
+      const authHeaders: Record<string, string> = { 'content-type': 'application/json' };
+      const gs = loadGhostoreSession();
+      if (gs?.accessToken) authHeaders.Authorization = `Bearer ${gs.accessToken}`;
       const res = await fetch('/api/thesis/vault', {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify({ output_hash: result.attestation.output_hash }),
       });
       if (!res.ok) throw new Error('vault');

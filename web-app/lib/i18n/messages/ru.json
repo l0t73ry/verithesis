@@ -169,13 +169,23 @@
   },
   "vault": {
     "drawerTitle": "План исполнения TEE vault",
-    "drawerIntro": "Только превью для жюри. Реальная сделка из UI не отправляется.",
+    "drawerIntro": "План planned только после DAO risk gates. Сделки из UI нет.",
     "status": "Статус",
     "reason": "Причина",
     "network": "Сеть",
     "dex": "DEX",
     "swap": "Обмен",
-    "policy": "Лимиты"
+    "policy": "Лимиты",
+    "daoTitle": "DAO риск",
+    "daoApproved": "Пройдено",
+    "daoRejected": "Отклонено"
+  },
+  "signalSub": {
+    "title": "Webhook офиц. сигнала",
+    "intro": "Hub шлёт POST только при смене сигнала (HTTPS + HMAC).",
+    "webhook": "Webhook URL (https)",
+    "add": "Подписаться",
+    "secretOnce": "Сохраните секрет подписи (показывается один раз):"
   },
   "snapshots": {
     "empty": "После анализа здесь появятся прошлые запуски. Выберите один, чтобы увидеть хеш и заголовок.",

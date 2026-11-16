@@ -169,13 +169,23 @@
   },
   "vault": {
     "drawerTitle": "TEE vault execution plan",
-    "drawerIntro": "Read-only preview for hackathon judges. No on-chain swap is sent from this UI.",
+    "drawerIntro": "DAO risk gates must pass before a planned swap. No on-chain tx from this UI.",
     "status": "Status",
     "reason": "Reason",
     "network": "Network",
     "dex": "DEX",
     "swap": "Swap",
-    "policy": "Policy"
+    "policy": "Policy",
+    "daoTitle": "DAO risk",
+    "daoApproved": "Gates passed",
+    "daoRejected": "Gates failed"
+  },
+  "signalSub": {
+    "title": "Official signal webhooks",
+    "intro": "Hub POSTs on signal edge changes only (e.g. neutral → bearish). HTTPS + optional HMAC.",
+    "webhook": "Webhook URL (https)",
+    "add": "Subscribe",
+    "secretOnce": "Save this signing secret now (shown once):"
   },
   "snapshots": {
     "empty": "Your past runs will appear here. Select one to review its output hash and headline.",

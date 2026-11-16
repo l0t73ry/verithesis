@@ -28,7 +28,7 @@ describe('planVaultExecution', () => {
     process.env.VERITHESIS_VAULT_ENABLED = '1';
     const plan = planVaultExecution(r);
     assert.equal(plan.status, 'rejected');
-    assert.equal(plan.reason, 'not_vault_eligible');
+    assert.equal(plan.reason, 'dao_risk_vault_eligible');
   });
 
   it('plans only for eligible bullish results and validates the network env', () => {
